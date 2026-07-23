@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+sqlalchemy
+asyncpg
+psycopg2-binary
+motor
+passlib[bcrypt]
+python-jose[cryptography]
+python-multipart
+ffmpeg-python
+pydantic-settings
