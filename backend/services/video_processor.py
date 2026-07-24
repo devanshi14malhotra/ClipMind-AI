@@ -6,7 +6,7 @@ from ai.pipeline import run_ai_pipeline
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-async def process_video_task(file_path: str, video_id: int, db_session):
+async def process_video_task(file_path: str, video_id: int, db_session, options):
     try:
         # Extract thumbnail
         thumbnail_path = f"{UPLOAD_DIR}/thumb_{video_id}.jpg"
@@ -20,21 +20,29 @@ async def process_video_task(file_path: str, video_id: int, db_session):
         
         # Run AI Pipeline
         audio_path = f"{UPLOAD_DIR}/audio_{video_id}.mp3"
-        transcript_segments, full_text, summary_text, key_moments = run_ai_pipeline(file_path, audio_path)
+        transcript_segments, full_text, summary_text, key_moments = run_ai_pipeline(
+            file_path, audio_path, 
+            generate_transcript=options.generate_transcript, 
+            generate_summary=options.generate_summary
+        )
 
         # Store in MongoDB
         from db.mongodb import get_mongo_db
         mongo_db = get_mongo_db()
-        await mongo_db.transcripts.insert_one({
-            "video_id": video_id,
-            "segments": transcript_segments,
-            "full_text": full_text
-        })
-        await mongo_db.summaries.insert_one({
-            "video_id": video_id,
-            "summary": summary_text,
-            "key_moments": key_moments
-        })
+        
+        if options.generate_transcript:
+            await mongo_db.transcripts.insert_one({
+                "video_id": video_id,
+                "segments": transcript_segments,
+                "full_text": full_text
+            })
+            
+        if options.generate_summary:
+            await mongo_db.summaries.insert_one({
+                "video_id": video_id,
+                "summary": summary_text,
+                "key_moments": key_moments
+            })
         
         # Update database status
         from db.database import Video

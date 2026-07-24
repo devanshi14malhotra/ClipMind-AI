@@ -57,31 +57,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     switch (role) {
       case "administrator":
         return [
-          { href: "/dashboard", icon: "dashboard", label: "Admin Dashboard" },
+          { href: "/dashboard", icon: "video_library", label: "My Library" },
           { href: "/dashboard/admin/users", icon: "manage_accounts", label: "User Management" },
           { href: "/dashboard/admin/activity", icon: "monitoring", label: "Platform Activity" },
           commonSettings
         ];
       case "learner":
         return [
-          { href: "/dashboard", icon: "feed", label: "Learning Feed" },
+          { href: "/dashboard", icon: "video_library", label: "My Library" },
           { href: "/dashboard/bookmarks", icon: "bookmark", label: "Bookmarks" },
-          { href: "/dashboard/transcripts", icon: "description", label: "Transcripts" },
           commonSettings
         ];
       case "educator":
         return [
-          { href: "/dashboard", icon: "video_library", label: "My Lectures" },
-          { href: "/dashboard/transcripts", icon: "description", label: "Transcripts" },
+          { href: "/dashboard", icon: "video_library", label: "My Library" },
           { href: "/dashboard/analytics", icon: "analytics", label: "Classroom Analytics" },
           commonSettings
         ];
       case "content_creator":
       default:
         return [
-          { href: "/dashboard", icon: "video_library", label: "My Videos" },
-          { href: "/dashboard/transcripts", icon: "description", label: "Transcripts" },
-          { href: "/dashboard/summaries", icon: "auto_awesome", label: "Summaries" },
+          { href: "/dashboard", icon: "video_library", label: "My Library" },
+          { href: "/dashboard/analytics", icon: "analytics", label: "Analytics" },
           commonSettings
         ];
     }

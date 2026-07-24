@@ -11,6 +11,8 @@ export default function VideoSummaryPage({ params }: { params: Promise<{ id: str
   const [isDeleting, setIsDeleting] = useState(false);
   const [isProcessingLocal, setIsProcessingLocal] = useState(false);
   const [processStep, setProcessStep] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const videoRef = React.useRef<HTMLVideoElement>(null);
   const router = useRouter();
 
   const handleDelete = async () => {
@@ -29,27 +31,52 @@ export default function VideoSummaryPage({ params }: { params: Promise<{ id: str
     }
   };
 
-  const handleProcess = async () => {
+  const handleProcess = async (type: 'all' | 'summary' = 'all') => {
     setIsProcessingLocal(true);
-    setProcessStep(1); // Extracting Audio
+    setProcessStep(type === 'summary' ? 3 : 1); 
     const token = localStorage.getItem("token");
     try {
       await fetch(`http://127.0.0.1:8000/api/video/${resolvedParams.id}/process`, {
         method: "POST",
-        headers: { "Authorization": `Bearer ${token}` }
+        headers: { 
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          generate_transcript: type === 'all',
+          generate_summary: true
+        })
       });
       
-      // Simulate chain of thought progress
-      setTimeout(() => setProcessStep(2), 3000); // Transcribing
-      setTimeout(() => setProcessStep(3), 8000); // Summarizing
-      setTimeout(() => {
-        setVideo({...video, status: "completed"});
-        window.location.reload(); // Refresh to fetch insights
-      }, 14000);
+      if (type === 'all') {
+        setTimeout(() => setProcessStep(2), 3000); 
+        setTimeout(() => setProcessStep(3), 8000); 
+        setTimeout(() => {
+          setVideo({...video, status: "completed"});
+          window.location.reload(); 
+        }, 14000);
+      } else {
+        setTimeout(() => {
+          window.location.reload(); 
+        }, 8000);
+      }
       
     } catch (e) {
       console.error("Process failed", e);
       setIsProcessingLocal(false);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      setCurrentTime(videoRef.current.currentTime);
+    }
+  };
+
+  const seekTo = (time: number) => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = time;
+      videoRef.current.play();
     }
   };
 
@@ -99,30 +126,33 @@ export default function VideoSummaryPage({ params }: { params: Promise<{ id: str
     processStep === 3 ? "Generating Multi-Paragraph Summary..." : "Analyzing Video...";
 
   return (
-    <div className="space-y-lg py-xl">
-      <div className="flex justify-between items-center mb-4">
+    <div className="space-y-8 py-8 mt-4">
+      <div className="flex justify-between items-center mb-8 bg-white/5 backdrop-blur-xl p-6 rounded-2xl border border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.2)]">
         <div>
-           <h1 className="font-headline-lg text-headline-lg text-white">{video.title || video.filename}</h1>
-           <p className="text-text-secondary mt-1">{video.description}</p>
+           <h1 className="text-3xl font-bold text-white tracking-tight">{video.title || video.filename}</h1>
+           <p className="text-text-secondary mt-2 text-sm">{video.description}</p>
            {video.tags && (
-             <div className="flex gap-2 mt-2">
+             <div className="flex gap-2 mt-4 flex-wrap">
                {video.tags.split(",").map((t: string) => (
-                 <span key={t} className="text-xs bg-white/5 border border-white/10 px-2 py-1 rounded text-text-tertiary">#{t.trim()}</span>
+                 <span key={t} className="text-xs bg-accent/20 border border-accent/20 px-3 py-1.5 rounded-lg text-accent font-bold tracking-wide">#{t.trim()}</span>
                ))}
              </div>
            )}
         </div>
-        <button onClick={handleDelete} disabled={isDeleting} className="bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 px-4 py-2 rounded-lg text-sm font-bold transition-all">
+        <button onClick={handleDelete} disabled={isDeleting} className="bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 px-6 py-3 rounded-xl text-sm font-bold transition-all shadow-[0_0_15px_rgba(239,68,68,0.2)] hover:scale-105 active:scale-95 flex items-center gap-2">
+          <span className="material-symbols-outlined">delete</span>
           {isDeleting ? "Deleting..." : "Delete Video"}
         </button>
       </div>
 
       {/* Video Section Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-lg">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Video Player */}
-        <div className="lg:col-span-8 space-y-md">
-          <div className="relative aspect-video bg-black rounded-xl overflow-hidden border border-outline-variant shadow-2xl">
+        <div className="lg:col-span-8 space-y-6">
+          <div className="relative aspect-video bg-black/50 backdrop-blur-3xl rounded-[2rem] overflow-hidden border border-white/10 shadow-[0_8px_32px_rgba(139,92,246,0.15)] glow-effect">
             <video 
+              ref={videoRef}
+              onTimeUpdate={handleTimeUpdate}
               controls 
               className="w-full h-full object-contain"
               src={`http://127.0.0.1:8000/api/video/stream/${video.id}`}
@@ -131,15 +161,16 @@ export default function VideoSummaryPage({ params }: { params: Promise<{ id: str
             </video>
           </div>
           
-          <div className="flex justify-between items-start bg-surface-container p-4 rounded-xl border border-white/5">
-            <div>
-              <p className="text-white font-bold flex items-center gap-2 capitalize">
-                Status: <span className={video.status === 'completed' ? 'text-green-400' : 'text-accent animate-pulse'}>{isProcessingLocal ? 'Processing' : video.status}</span>
+          <div className="flex justify-between items-center bg-white/5 backdrop-blur-xl p-6 rounded-2xl border border-white/10 shadow-lg">
+            <div className="flex items-center gap-4">
+              <div className={`w-3 h-3 rounded-full shadow-[0_0_10px_currentColor] ${video.status === 'completed' ? 'bg-green-400 text-green-400' : 'bg-accent text-accent animate-pulse'}`}></div>
+              <p className="text-white font-bold tracking-wide capitalize flex items-center gap-2">
+                Status: <span className={video.status === 'completed' ? 'text-green-400' : 'text-accent'}>{isProcessingLocal ? 'Processing' : video.status}</span>
               </p>
             </div>
             {isUploaded && (
-              <button onClick={handleProcess} className="ai-gradient-bg px-6 py-2 rounded-lg text-white font-bold hover:scale-105 transition-transform flex items-center gap-2 shadow-lg shadow-accent/20">
-                <span className="material-symbols-outlined">auto_awesome</span> Generate AI Insights
+              <button onClick={handleProcess} className="bg-gradient-to-r from-purple-500 to-pink-500 px-8 py-3 rounded-xl text-white font-bold hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2 shadow-[0_4px_20px_rgba(217,70,239,0.4)]">
+                <span className="material-symbols-outlined text-xl">auto_awesome</span> Generate AI Insights
               </button>
             )}
           </div>
@@ -147,32 +178,48 @@ export default function VideoSummaryPage({ params }: { params: Promise<{ id: str
 
         {/* Transcript / Key Moments Timeline */}
         <div className="lg:col-span-4 h-full">
-          <div className="bg-surface-container border border-outline-variant rounded-xl flex flex-col h-full max-h-[480px]">
-            <div className="p-md border-b border-outline-variant flex items-center justify-between">
-              <h3 className="font-headline-md text-headline-md text-on-surface">Transcript</h3>
-              <span className="px-xs py-1 bg-tertiary/10 text-tertiary text-label-md rounded border border-tertiary/20">AI Identified</span>
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.2)] rounded-2xl flex flex-col h-full max-h-[600px] overflow-hidden">
+            <div className="p-6 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <span className="material-symbols-outlined text-accent">subtitles</span>
+                Transcript
+              </h3>
+              <span className="px-3 py-1 bg-accent/20 text-accent text-xs font-bold rounded-lg border border-accent/20 shadow-[0_0_10px_rgba(139,92,246,0.2)]">AI Identified</span>
             </div>
-            <div className="flex-1 overflow-y-auto p-md space-y-md">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
               {isProcessing ? (
-                <div className="animate-pulse space-y-4">
-                  <p className="text-accent text-sm font-bold mb-4">{processStatusText}</p>
-                  <div className="h-4 bg-outline-variant/30 rounded w-3/4"></div>
-                  <div className="h-4 bg-outline-variant/30 rounded w-full"></div>
-                  <div className="h-4 bg-outline-variant/30 rounded w-5/6"></div>
+                <div className="animate-pulse space-y-4 p-4">
+                  <p className="text-accent text-sm font-bold mb-6 flex items-center gap-2">
+                    <span className="material-symbols-outlined animate-spin-slow">sync</span>
+                    {processStatusText}
+                  </p>
+                  <div className="h-3 bg-white/10 rounded-full w-3/4"></div>
+                  <div className="h-3 bg-white/10 rounded-full w-full"></div>
+                  <div className="h-3 bg-white/10 rounded-full w-5/6"></div>
                 </div>
               ) : transcript?.segments?.length > 0 ? (
-                transcript.segments.map((seg: any, idx: number) => (
-                  <div key={idx} className="flex gap-md group cursor-pointer hover:bg-surface-container-high p-sm rounded-lg transition-all border border-transparent hover:border-outline-variant">
-                    <span className="font-mono-code text-primary bg-primary/10 px-sm py-xs rounded h-fit">
-                      {new Date(seg.start * 1000).toISOString().substring(14, 19)}
-                    </span>
-                    <div className="space-y-xs text-body-sm text-on-surface-variant">
-                      {seg.text}
+                transcript.segments.map((seg: any, idx: number) => {
+                  const isActive = currentTime >= seg.start && currentTime <= seg.end;
+                  return (
+                    <div 
+                      key={idx} 
+                      onClick={() => seekTo(seg.start)}
+                      className={`flex gap-4 group cursor-pointer p-4 rounded-xl transition-all border ${isActive ? 'bg-white/10 border-accent shadow-[0_0_15px_rgba(139,92,246,0.2)]' : 'border-transparent hover:bg-white/5 hover:border-white/10'}`}
+                    >
+                      <span className={`font-mono px-2 py-1 rounded text-xs h-fit font-bold transition-colors ${isActive ? 'bg-accent text-white border-accent' : 'text-accent bg-accent/10 border-accent/20 group-hover:bg-accent/20'}`}>
+                        {new Date(seg.start * 1000).toISOString().substring(14, 19)}
+                      </span>
+                      <div className={`text-sm transition-colors leading-relaxed ${isActive ? 'text-white font-medium' : 'text-text-secondary group-hover:text-white/90'}`}>
+                        {seg.text}
+                      </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
-                <p className="text-on-surface-variant text-sm">No transcript available.</p>
+                <div className="flex flex-col items-center justify-center h-full text-center p-8 opacity-50">
+                  <span className="material-symbols-outlined text-4xl mb-4">speaker_notes_off</span>
+                  <p className="text-white text-sm">No transcript available.</p>
+                </div>
               )}
             </div>
           </div>
@@ -180,31 +227,43 @@ export default function VideoSummaryPage({ params }: { params: Promise<{ id: str
       </div>
 
       {/* Summary Cards Section */}
-      <div className="grid grid-cols-1 gap-lg">
-        <div className="bg-surface-container border border-outline-variant rounded-xl p-lg relative overflow-hidden group hover:border-outline transition-all min-h-[300px]">
-          <div className="absolute top-0 right-0 p-lg opacity-10">
-            <span className="material-symbols-outlined text-[64px]">bolt</span>
+      <div className="grid grid-cols-1 gap-8">
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.2)] rounded-2xl p-8 relative overflow-hidden group transition-all min-h-[300px]">
+          <div className="absolute top-0 right-0 p-8 opacity-[0.03] transform group-hover:scale-110 transition-transform duration-700">
+            <span className="material-symbols-outlined text-[120px]">bolt</span>
           </div>
-          <h4 className="font-headline-md text-headline-md text-on-surface mb-md flex items-center gap-sm">
-            <span className="material-symbols-outlined text-primary">auto_awesome</span>
+          <h4 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-[0_0_15px_rgba(217,70,239,0.5)]">
+              <span className="material-symbols-outlined text-white text-xl">auto_awesome</span>
+            </div>
             AI Detailed Summary
           </h4>
           
           {isProcessing ? (
-             <div className="animate-pulse space-y-4 mt-8">
-                <div className="h-4 bg-outline-variant/30 rounded w-full"></div>
-                <div className="h-4 bg-outline-variant/30 rounded w-full"></div>
-                <div className="h-4 bg-outline-variant/30 rounded w-3/4"></div>
-                <div className="h-4 bg-outline-variant/30 rounded w-11/12 mt-6"></div>
-                <div className="h-4 bg-outline-variant/30 rounded w-full"></div>
+             <div className="animate-pulse space-y-4 mt-8 max-w-4xl">
+                <div className="h-3 bg-white/10 rounded-full w-full"></div>
+                <div className="h-3 bg-white/10 rounded-full w-full"></div>
+                <div className="h-3 bg-white/10 rounded-full w-3/4"></div>
+                <div className="h-3 bg-white/10 rounded-full w-11/12 mt-8"></div>
+                <div className="h-3 bg-white/10 rounded-full w-full"></div>
              </div>
           ) : isUploaded ? (
-            <div className="text-center py-12">
-               <span className="material-symbols-outlined text-6xl text-white/10 mb-4">analytics</span>
-               <p className="text-text-secondary">Summary has not been generated yet.</p>
+            <div className="flex flex-col items-center justify-center py-16 opacity-50">
+               <span className="material-symbols-outlined text-6xl mb-4">analytics</span>
+               <p className="text-white text-lg font-bold">Summary has not been generated yet.</p>
+               <p className="text-text-tertiary text-sm mt-2">Click "Generate AI Insights" above to start processing.</p>
+            </div>
+          ) : !summary?.summary ? (
+            <div className="flex flex-col items-center justify-center py-16">
+               <span className="material-symbols-outlined text-6xl text-pink-500 mb-4 opacity-50">auto_awesome</span>
+               <p className="text-white text-lg font-bold">No Summary Available</p>
+               <p className="text-text-tertiary text-sm mt-2 mb-6 text-center max-w-md">You opted out of summary generation during upload. You can generate one now.</p>
+               <button onClick={() => handleProcess('summary')} className="bg-gradient-to-r from-purple-500 to-pink-500 px-8 py-3 rounded-xl text-white font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-[0_4px_20px_rgba(217,70,239,0.4)]">
+                 Generate Summary Now
+               </button>
             </div>
           ) : (
-            <div className="text-body-md text-on-surface-variant leading-relaxed whitespace-pre-wrap max-w-4xl">
+            <div className="text-lg text-text-secondary leading-loose whitespace-pre-wrap max-w-4xl relative z-10">
               {summary?.summary || "No summary available."}
             </div>
           )}
