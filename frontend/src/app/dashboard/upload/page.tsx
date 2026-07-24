@@ -52,7 +52,7 @@ export default function UploadPage() {
         return;
       }
 
-      const res = await fetch("http://localhost:8000/api/video/upload", {
+      const res = await fetch("http://127.0.0.1:8000/api/video/upload", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`

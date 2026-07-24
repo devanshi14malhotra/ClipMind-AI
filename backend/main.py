@@ -2,7 +2,7 @@ import os
 import sys
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 # Set HuggingFace Token for local models if present
 if os.getenv("HF_TOKEN"):
@@ -23,17 +23,25 @@ app = FastAPI(title="ClipMind AI Backend")
 @app.on_event("startup")
 def create_admin_user():
     db = SessionLocal()
-    admin = db.query(User).filter(User.role == "administrator").first()
-    if not admin:
-        hashed_password = get_password_hash("adminpassword")
-        admin_user = User(
-            name="Admin",
-            email="admin@clipmind.com",
-            hashed_password=hashed_password,
-            role="administrator"
-        )
-        db.add(admin_user)
-        db.commit()
+    roles_to_seed = [
+        {"name": "Admin", "email": "admin@clipmind.com", "role": "administrator"},
+        {"name": "Content Creator", "email": "creator@clipmind.com", "role": "creator"},
+        {"name": "Learner", "email": "learner@clipmind.com", "role": "learner"},
+        {"name": "Educator", "email": "educator@clipmind.com", "role": "educator"}
+    ]
+    
+    for user_data in roles_to_seed:
+        user = db.query(User).filter(User.email == user_data["email"]).first()
+        if not user:
+            hashed_password = get_password_hash("password123")
+            new_user = User(
+                name=user_data["name"],
+                email=user_data["email"],
+                hashed_password=hashed_password,
+                role=user_data["role"]
+            )
+            db.add(new_user)
+            db.commit()
     db.close()
 
 app.add_middleware(

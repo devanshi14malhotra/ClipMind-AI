@@ -18,7 +18,7 @@ export default function Dashboard() {
         return;
       }
       try {
-        const res = await fetch("http://localhost:8000/api/video/", {
+        const res = await fetch("http://127.0.0.1:8000/api/video/", {
           headers: {
             "Authorization": `Bearer ${token}`
           }
@@ -141,7 +141,7 @@ export default function Dashboard() {
               <Link href={`/dashboard/video/${video.id}`} key={video.id} className="group cursor-pointer">
                 <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 mb-3 bg-surface-container shadow-lg">
                   {video.thumbnail_url ? (
-                    <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={video.filename} src={`http://localhost:8000${video.thumbnail_url}`} />
+                    <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={video.filename} src={`http://127.0.0.1:8000${video.thumbnail_url}`} />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-surface-container">
                       <span className="material-symbols-outlined text-white/20 text-5xl">movie</span>

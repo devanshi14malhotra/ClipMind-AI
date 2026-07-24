@@ -23,7 +23,7 @@ export default function AdminUsersPage() {
     const token = localStorage.getItem("token");
     if (!token) return router.push("/login");
     try {
-      const res = await fetch("http://localhost:8000/api/admin/users", {
+      const res = await fetch("http://127.0.0.1:8000/api/admin/users", {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) setUsers(await res.json());
@@ -37,7 +37,7 @@ export default function AdminUsersPage() {
   const handleRoleChange = async (userId: number, newRole: string) => {
     const token = localStorage.getItem("token");
     try {
-      await fetch(`http://localhost:8000/api/admin/users/${userId}/role`, {
+      await fetch(`http://127.0.0.1:8000/api/admin/users/${userId}/role`, {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${token}`,

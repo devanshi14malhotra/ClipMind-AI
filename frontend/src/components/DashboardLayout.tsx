@@ -18,7 +18,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         return;
       }
       try {
-        const res = await fetch("http://localhost:8000/api/auth/me", {
+        const res = await fetch("http://127.0.0.1:8000/api/auth/me", {
           headers: {
             "Authorization": `Bearer ${token}`
           }

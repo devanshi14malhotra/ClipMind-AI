@@ -19,9 +19,9 @@ export default function VideoSummaryPage({ params }: { params: { id: string } })
 
       try {
         const [videoRes, transcriptRes, summaryRes] = await Promise.all([
-          fetch(`http://localhost:8000/api/video/${params.id}`, { headers: { "Authorization": `Bearer ${token}` } }),
-          fetch(`http://localhost:8000/api/insights/transcript/${params.id}`, { headers: { "Authorization": `Bearer ${token}` } }),
-          fetch(`http://localhost:8000/api/insights/summary/${params.id}`, { headers: { "Authorization": `Bearer ${token}` } }),
+          fetch(`http://127.0.0.1:8000/api/video/${params.id}`, { headers: { "Authorization": `Bearer ${token}` } }),
+          fetch(`http://127.0.0.1:8000/api/insights/transcript/${params.id}`, { headers: { "Authorization": `Bearer ${token}` } }),
+          fetch(`http://127.0.0.1:8000/api/insights/summary/${params.id}`, { headers: { "Authorization": `Bearer ${token}` } }),
         ]);
 
         if (videoRes.ok) setVideo(await videoRes.json());
