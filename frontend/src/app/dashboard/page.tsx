@@ -156,7 +156,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </div>
-                <h4 className="font-bold text-white truncate group-hover:text-accent transition-colors">{video.filename}</h4>
+                <h4 className="font-bold text-white truncate group-hover:text-accent transition-colors">{video.title || video.filename}</h4>
                 <div className="flex items-center gap-2 mt-1">
                   <span className={`w-2 h-2 rounded-full ${video.status === 'completed' ? 'bg-green-500' : 'bg-yellow-500 animate-pulse'}`}></span>
                   <p className="text-xs text-text-secondary capitalize">{video.status}</p>

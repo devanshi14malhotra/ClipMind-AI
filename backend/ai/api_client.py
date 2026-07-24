@@ -65,11 +65,12 @@ def _groq_summarize(text: str):
     truncated_text = text[:max_chars] if len(text) > max_chars else text
     
     prompt = f"""
-    Please provide a highly professional, concise summary of the following video transcript. 
-    Then, extract 3-5 key moments or topics discussed.
+    Please provide a highly detailed, comprehensive, and multi-paragraph summary of the following video transcript. 
+    Do NOT restrict the length. Provide a deep analysis of the main themes, important details, and the overall narrative.
+    After the summary, extract 3-5 key moments or topics discussed.
     Format your response in JSON matching this exact structure, do not include any other text:
     {{
-        "summary": "Your detailed summary here...",
+        "summary": "Your detailed multi-paragraph summary here...",
         "key_moments": [
             {{"time": "00:00", "title": "Topic 1", "description": "Brief description..."}}
         ]

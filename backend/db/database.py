@@ -30,7 +30,10 @@ class Video(Base):
     id = Column(Integer, primary_key=True, index=True)
     owner_id = Column(Integer, index=True)
     filename = Column(String)
-    status = Column(String, default="processing")
+    title = Column(String, default="")
+    description = Column(String, default="")
+    tags = Column(String, default="")
+    status = Column(String, default="uploaded")
     created_at = Column(DateTime, default=datetime.utcnow)
 
 Base.metadata.create_all(bind=engine)

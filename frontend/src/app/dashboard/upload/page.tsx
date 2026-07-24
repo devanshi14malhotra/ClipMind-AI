@@ -7,8 +7,26 @@ export default function UploadPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && tagInput.trim()) {
+      e.preventDefault();
+      if (!tags.includes(tagInput.trim())) {
+        setTags([...tags, tagInput.trim()]);
+      }
+      setTagInput("");
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(t => t !== tagToRemove));
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -41,8 +59,16 @@ export default function UploadPage() {
       return;
     }
 
+    if (!title.trim()) {
+      alert("Please enter a video title.");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("file", selectedFile);
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("tags", tags.join(","));
 
     setUploadProgress(10);
     try {
@@ -69,13 +95,14 @@ export default function UploadPage() {
             errText = await res.text();
         }
         throw new Error(`Upload failed (${res.status}): ${errText}`);
-      }      
+      const data = await res.json();
+      
       // Simulate progress bar completing
       const interval = setInterval(() => {
         setUploadProgress((prev) => {
           if (prev >= 100) {
             clearInterval(interval);
-            setTimeout(() => router.push("/dashboard"), 1000);
+            setTimeout(() => router.push(`/dashboard/video/${data.video_id}`), 500);
             return 100;
           }
           return prev + 20;
@@ -157,20 +184,22 @@ export default function UploadPage() {
           <div className="glass-panel rounded-2xl p-6 space-y-6">
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-xs font-bold text-text-secondary uppercase tracking-widest">Video Title</label>
-                <input className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:ring-1 focus:ring-accent focus:border-accent text-white outline-none transition-all" placeholder="Project marketing overview..." type="text" />
+                <label className="text-xs font-bold text-text-secondary uppercase tracking-widest">Video Title <span className="text-red-500">*</span></label>
+                <input value={title} onChange={e => setTitle(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:ring-1 focus:ring-accent focus:border-accent text-white outline-none transition-all" placeholder="Project marketing overview..." type="text" />
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-bold text-text-secondary uppercase tracking-widest">Description</label>
-                <textarea className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:ring-1 focus:ring-accent focus:border-accent text-white outline-none transition-all resize-none" placeholder="Describe the content of your video..." rows={3}></textarea>
+                <textarea value={description} onChange={e => setDescription(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:ring-1 focus:ring-accent focus:border-accent text-white outline-none transition-all resize-none" placeholder="Describe the content of your video..." rows={3}></textarea>
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-bold text-text-secondary uppercase tracking-widest">Tags</label>
-                <div className="flex flex-wrap gap-2 p-2 border border-white/10 rounded-xl bg-white/5">
-                  <span className="bg-accent/20 text-accent font-bold px-3 py-1 rounded-lg text-xs flex items-center gap-1 border border-accent/20">
-                    #marketing <span className="material-symbols-outlined text-xs cursor-pointer hover:text-white">close</span>
-                  </span>
-                  <input className="flex-grow bg-transparent border-none focus:ring-0 text-sm py-1 outline-none text-white placeholder-text-tertiary" placeholder="Add tags..." type="text" />
+                <div className="flex flex-wrap gap-2 p-2 border border-white/10 rounded-xl bg-white/5 min-h-[48px]">
+                  {tags.map((tag, idx) => (
+                    <span key={idx} className="bg-accent/20 text-accent font-bold px-3 py-1 rounded-lg text-xs flex items-center gap-1 border border-accent/20">
+                      #{tag} <span onClick={() => removeTag(tag)} className="material-symbols-outlined text-xs cursor-pointer hover:text-white">close</span>
+                    </span>
+                  ))}
+                  <input value={tagInput} onChange={e => setTagInput(e.target.value)} onKeyDown={handleAddTag} className="flex-grow bg-transparent border-none focus:ring-0 text-sm py-1 outline-none text-white placeholder-text-tertiary" placeholder="Type and press Enter to add tags..." type="text" />
                 </div>
               </div>
             </div>
