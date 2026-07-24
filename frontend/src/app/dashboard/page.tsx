@@ -8,19 +8,22 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isDateOpen, setIsDateOpen] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     const fetchVideos = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
+      const storedToken = localStorage.getItem("token");
+      if (!storedToken) {
         router.push("/login");
         return;
       }
+      setToken(storedToken);
       try {
         const res = await fetch("http://127.0.0.1:8000/api/video/", {
           headers: {
-            "Authorization": `Bearer ${token}`
+            "Authorization": `Bearer ${storedToken}`
           }
         });
         if (res.ok) {
@@ -38,9 +41,23 @@ export default function Dashboard() {
 
   const quickStats = [
     { title: "Total Videos", value: videos.length.toString(), icon: "video_library", increase: "Your library size" },
-    { title: "Summaries Generated", value: videos.length > 0 ? "0" : "0", icon: "auto_awesome", increase: "Coming soon" },
+    { title: "Summaries Generated", value: videos.filter(v => v.status === "completed").length.toString(), icon: "auto_awesome", increase: "Coming soon" },
     { title: "Watch Time Saved", value: "0h", icon: "timer", increase: "Milestone 2" },
   ];
+
+  const uniqueTags = Array.from(
+    new Set(
+      videos.flatMap((v) => (v.tags ? v.tags.split(",").map((t: string) => t.trim().toLowerCase()) : []))
+    )
+  ).filter(Boolean);
+
+  const filteredVideos = selectedTag
+    ? videos.filter((v) => {
+        if (!v.tags) return false;
+        const vTags = v.tags.split(",").map((t: string) => t.trim().toLowerCase());
+        return vTags.includes(selectedTag.toLowerCase());
+      })
+    : videos;
 
   return (
     <>
@@ -53,23 +70,33 @@ export default function Dashboard() {
           <div className="relative">
             <button 
               onClick={() => { setIsFilterOpen(!isFilterOpen); setIsDateOpen(false); }}
-              className="glass-panel border border-white/10 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-white/10 transition-all flex items-center gap-3"
+              className={`glass-panel border ${selectedTag ? 'border-accent text-accent' : 'border-white/10 text-white'} px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-white/10 transition-all flex items-center gap-3`}
             >
-              <span className="material-symbols-outlined text-sm">filter_list</span> Filter
+              <span className="material-symbols-outlined text-sm">filter_list</span> {selectedTag ? `#${selectedTag}` : 'Filter'}
+              {selectedTag && (
+                <span 
+                  className="material-symbols-outlined text-sm ml-2 hover:text-white" 
+                  onClick={(e) => { e.stopPropagation(); setSelectedTag(null); }}
+                >
+                  close
+                </span>
+              )}
             </button>
             {isFilterOpen && (
-              <div className="absolute right-0 mt-2 w-48 glass-panel border border-white/10 rounded-xl shadow-xl z-50 overflow-hidden backdrop-blur-xl">
+              <div className="absolute right-0 mt-2 w-48 glass-panel border border-white/10 rounded-xl shadow-xl z-50 overflow-hidden backdrop-blur-xl max-h-64 overflow-y-auto custom-scrollbar">
                 <div className="p-2 space-y-1">
                   <p className="px-3 py-1.5 text-xs font-bold text-text-tertiary uppercase tracking-wider">By Tag</p>
-                  <button className="w-full text-left px-3 py-2 rounded-lg text-sm text-white hover:bg-white/10 transition-colors flex justify-between items-center">
-                    #marketing <span className="w-2 h-2 rounded-full bg-accent"></span>
-                  </button>
-                  <button className="w-full text-left px-3 py-2 rounded-lg text-sm text-white hover:bg-white/10 transition-colors flex justify-between items-center">
-                    #education <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                  </button>
-                  <button className="w-full text-left px-3 py-2 rounded-lg text-sm text-white hover:bg-white/10 transition-colors flex justify-between items-center">
-                    #tutorial <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                  </button>
+                  {uniqueTags.length > 0 ? uniqueTags.map((tag, idx) => (
+                    <button 
+                      key={idx}
+                      onClick={() => { setSelectedTag(tag); setIsFilterOpen(false); }}
+                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex justify-between items-center ${selectedTag === tag ? 'bg-accent/20 text-accent font-bold' : 'text-white hover:bg-white/10'}`}
+                    >
+                      #{tag} 
+                    </button>
+                  )) : (
+                    <p className="px-3 py-2 text-sm text-text-tertiary">No tags found</p>
+                  )}
                 </div>
               </div>
             )}
@@ -116,7 +143,7 @@ export default function Dashboard() {
 
       <section className="mb-xl relative z-10">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-bold text-white tracking-tight">Recent Videos</h2>
+          <h2 className="text-2xl font-bold text-white tracking-tight">{selectedTag ? `Videos tagged #${selectedTag}` : 'Recent Videos'}</h2>
           {videos.length > 0 && <Link className="text-accent text-sm font-medium hover:underline" href="/dashboard">View all</Link>}
         </div>
 
@@ -135,23 +162,27 @@ export default function Dashboard() {
               <span className="material-symbols-outlined">upload</span> Upload First Video
             </Link>
           </div>
+        ) : filteredVideos.length === 0 ? (
+          <div className="glass-panel border border-white/5 rounded-[2rem] p-12 text-center flex flex-col items-center justify-center glow-effect">
+            <span className="material-symbols-outlined text-4xl text-accent mb-4">filter_list_off</span>
+            <h3 className="text-xl font-bold text-white mb-2">No videos match this filter</h3>
+            <p className="text-text-secondary">Try selecting a different tag.</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {videos.map((video) => (
+            {filteredVideos.map((video) => (
               <Link href={`/dashboard/video/${video.id}`} key={video.id} className="group cursor-pointer">
-                <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 mb-3 bg-surface-container shadow-lg">
-                  {video.thumbnail_url ? (
-                    <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={video.filename} src={`http://127.0.0.1:8000${video.thumbnail_url}`} />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-surface-container">
-                      <span className="material-symbols-outlined text-white/20 text-5xl">movie</span>
-                    </div>
-                  )}
+                <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 mb-3 bg-black shadow-lg flex items-center justify-center">
+                  <video 
+                    src={token ? `http://127.0.0.1:8000/api/video/stream/${video.id}?token=${token}#t=0.1` : ''} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-60 group-hover:opacity-100" 
+                    preload="metadata"
+                  />
                   {video.duration && (
                     <div className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-md px-2 py-1 rounded text-xs font-bold text-white">{video.duration}</div>
                   )}
                   <div className="absolute inset-0 bg-accent/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <div className="w-12 h-12 rounded-full bg-accent/80 flex items-center justify-center backdrop-blur shadow-[0_0_15px_rgba(139,92,246,0.5)]">
+                    <div className="w-12 h-12 rounded-full bg-accent/80 flex items-center justify-center backdrop-blur shadow-[0_0_15px_rgba(139,92,246,0.5)] transform group-hover:scale-110 transition-transform">
                       <span className="material-symbols-outlined text-white text-2xl">play_arrow</span>
                     </div>
                   </div>
