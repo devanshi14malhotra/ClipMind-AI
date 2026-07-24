@@ -32,9 +32,9 @@ export default function VideoSummaryPage({ params }: { params: Promise<{ id: str
     }
   };
 
-  const handleProcess = async (type: 'all' | 'summary' = 'all') => {
+  const handleProcess = async (type: 'all' | 'summary' | 'transcript' = 'all') => {
     setIsProcessingLocal(true);
-    setProcessStep(type === 'summary' ? 3 : 1); 
+    setProcessStep(type === 'summary' ? 3 : (type === 'transcript' ? 2 : 1)); 
     const token = localStorage.getItem("token");
     try {
       await fetch(`http://127.0.0.1:8000/api/video/${resolvedParams.id}/process`, {
@@ -44,8 +44,8 @@ export default function VideoSummaryPage({ params }: { params: Promise<{ id: str
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          generate_transcript: type === 'all',
-          generate_summary: true
+          generate_transcript: type === 'all' || type === 'transcript',
+          generate_summary: type === 'all' || type === 'summary'
         })
       });
       
@@ -218,9 +218,13 @@ export default function VideoSummaryPage({ params }: { params: Promise<{ id: str
                   );
                 })
               ) : (
-                <div className="flex flex-col items-center justify-center h-full text-center p-8 opacity-50">
-                  <span className="material-symbols-outlined text-4xl mb-4">speaker_notes_off</span>
-                  <p className="text-white text-sm">No transcript available.</p>
+                <div className="flex flex-col items-center justify-center h-full text-center p-8">
+                  <span className="material-symbols-outlined text-4xl mb-4 opacity-50 text-accent">speaker_notes_off</span>
+                  <p className="text-white text-sm font-bold mb-2">No Transcript Available</p>
+                  <p className="text-text-tertiary text-xs mb-4">You opted out of transcript generation.</p>
+                  <button onClick={() => handleProcess('transcript')} className="bg-accent/20 text-accent border border-accent/20 px-4 py-2 rounded-lg text-sm font-bold hover:bg-accent hover:text-white transition-all shadow-[0_4px_15px_rgba(139,92,246,0.3)]">
+                    Generate Transcript Now
+                  </button>
                 </div>
               )}
             </div>
