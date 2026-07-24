@@ -32,7 +32,7 @@ async def get_summary(video_id: int, current_user = Depends(get_current_user), d
     mongo_db = get_mongo_db()
     summary = await mongo_db.summaries.find_one({"video_id": video_id})
     if not summary:
-        return {"summary": "Summary is still processing.", "key_moments": []}
+        return {"summary": "", "key_moments": []}
     
     # Remove MongoDB's internal _id field
     summary.pop("_id", None)

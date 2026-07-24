@@ -12,6 +12,7 @@ export default function VideoSummaryPage({ params }: { params: Promise<{ id: str
   const [isProcessingLocal, setIsProcessingLocal] = useState(false);
   const [processStep, setProcessStep] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
+  const [token, setToken] = useState<string | null>(null);
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const router = useRouter();
 
@@ -82,17 +83,18 @@ export default function VideoSummaryPage({ params }: { params: Promise<{ id: str
 
   useEffect(() => {
     const fetchData = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
+      const storedToken = localStorage.getItem("token");
+      if (!storedToken) {
         router.push("/login");
         return;
       }
+      setToken(storedToken);
 
       try {
         const [videoRes, transcriptRes, summaryRes] = await Promise.all([
-          fetch(`http://127.0.0.1:8000/api/video/${resolvedParams.id}`, { headers: { "Authorization": `Bearer ${token}` } }),
-          fetch(`http://127.0.0.1:8000/api/insights/transcript/${resolvedParams.id}`, { headers: { "Authorization": `Bearer ${token}` } }),
-          fetch(`http://127.0.0.1:8000/api/insights/summary/${resolvedParams.id}`, { headers: { "Authorization": `Bearer ${token}` } }),
+          fetch(`http://127.0.0.1:8000/api/video/${resolvedParams.id}`, { headers: { "Authorization": `Bearer ${storedToken}` } }),
+          fetch(`http://127.0.0.1:8000/api/insights/transcript/${resolvedParams.id}`, { headers: { "Authorization": `Bearer ${storedToken}` } }),
+          fetch(`http://127.0.0.1:8000/api/insights/summary/${resolvedParams.id}`, { headers: { "Authorization": `Bearer ${storedToken}` } }),
         ]);
 
         if (videoRes.ok) setVideo(await videoRes.json());
@@ -155,7 +157,7 @@ export default function VideoSummaryPage({ params }: { params: Promise<{ id: str
               onTimeUpdate={handleTimeUpdate}
               controls 
               className="w-full h-full object-contain"
-              src={`http://127.0.0.1:8000/api/video/stream/${video.id}`}
+              src={token ? `http://127.0.0.1:8000/api/video/stream/${video.id}?token=${token}` : ''}
             >
               Your browser does not support the video tag.
             </video>

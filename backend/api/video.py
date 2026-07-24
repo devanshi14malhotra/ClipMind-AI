@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from db.database import get_db, Video, User
-from services.auth_service import get_current_user
+from services.auth_service import get_current_user, get_current_user_from_query
 from services.video_processor import process_video_task, UPLOAD_DIR
 
 router = APIRouter()
@@ -103,7 +103,7 @@ def range_requests_response(
     )
 
 @router.get("/stream/{video_id}")
-def stream_video(video_id: int, request: Request, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def stream_video(video_id: int, request: Request, current_user: User = Depends(get_current_user_from_query), db: Session = Depends(get_db)):
     video = db.query(Video).filter(Video.id == video_id, Video.owner_id == current_user.id).first()
     if not video:
         raise HTTPException(status_code=404, detail="Video not found")
