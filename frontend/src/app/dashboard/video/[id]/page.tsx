@@ -1,8 +1,9 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 
-export default function VideoSummaryPage({ params }: { params: { id: string } }) {
+export default function VideoSummaryPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
   const [video, setVideo] = useState<any>(null);
   const [transcript, setTranscript] = useState<any>(null);
   const [summary, setSummary] = useState<any>(null);
@@ -19,9 +20,9 @@ export default function VideoSummaryPage({ params }: { params: { id: string } })
 
       try {
         const [videoRes, transcriptRes, summaryRes] = await Promise.all([
-          fetch(`http://127.0.0.1:8000/api/video/${params.id}`, { headers: { "Authorization": `Bearer ${token}` } }),
-          fetch(`http://127.0.0.1:8000/api/insights/transcript/${params.id}`, { headers: { "Authorization": `Bearer ${token}` } }),
-          fetch(`http://127.0.0.1:8000/api/insights/summary/${params.id}`, { headers: { "Authorization": `Bearer ${token}` } }),
+          fetch(`http://127.0.0.1:8000/api/video/${resolvedParams.id}`, { headers: { "Authorization": `Bearer ${token}` } }),
+          fetch(`http://127.0.0.1:8000/api/insights/transcript/${resolvedParams.id}`, { headers: { "Authorization": `Bearer ${token}` } }),
+          fetch(`http://127.0.0.1:8000/api/insights/summary/${resolvedParams.id}`, { headers: { "Authorization": `Bearer ${token}` } }),
         ]);
 
         if (videoRes.ok) setVideo(await videoRes.json());
@@ -34,7 +35,7 @@ export default function VideoSummaryPage({ params }: { params: { id: string } })
       }
     };
     fetchData();
-  }, [params.id, router]);
+  }, [resolvedParams.id, router]);
 
   if (isLoading) {
     return (
