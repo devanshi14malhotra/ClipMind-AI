@@ -14,7 +14,7 @@ os.environ["PATH"] += os.pathsep + bin_path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api import auth, video, admin, insights
+from api import auth, video, admin, insights, analytics
 from db.database import SessionLocal, User
 from services.auth_service import get_password_hash
 
@@ -46,7 +46,7 @@ def create_admin_user():
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -56,6 +56,7 @@ app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(video.router, prefix="/api/video", tags=["video"])
 app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 app.include_router(insights.router, prefix="/api/insights", tags=["insights"])
+app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
 
 @app.get("/health")
 def health_check():

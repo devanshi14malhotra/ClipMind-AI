@@ -60,23 +60,27 @@ def groq_transcribe(audio_path: str):
 
 def _groq_summarize(text: str):
     client = get_groq_client()
-    # Limit text slightly to ensure we don't blow past LLaMA's context window for huge transcripts
-    max_chars = 20000 
+    # Limit text slightly to ensure we don't blow past LLaMA's 128k token context window
+    max_chars = 250000 
     truncated_text = text[:max_chars] if len(text) > max_chars else text
     
     prompt = f"""
     Please provide a highly detailed, comprehensive, and multi-paragraph summary of the following video transcript. 
+    The transcript includes timestamps in [MM:SS] format before each spoken segment.
     Do NOT restrict the length. Provide a deep analysis of the main themes, important details, and the overall narrative.
     After the summary, extract 3-5 key moments or topics discussed.
+    CRITICAL: For each key moment, extract the EXACT timestamp (in MM:SS format) from the transcript where that topic actually begins! Do NOT invent or make up timestamps.
+    Finally, extract 5-10 highly relevant single-word or short-phrase keywords that represent the core topics.
     Format your response in JSON matching this exact structure, do not include any other text:
     {{
         "summary": "Your detailed multi-paragraph summary here...",
         "key_moments": [
             {{"time": "00:00", "title": "Topic 1", "description": "Brief description..."}}
-        ]
+        ],
+        "keywords": ["Keyword1", "Keyword2", "Keyword3"]
     }}
     
-    Transcript:
+    Transcript with Timestamps:
     {truncated_text}
     """
     

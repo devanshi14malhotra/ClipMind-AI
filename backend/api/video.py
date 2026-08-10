@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from db.database import get_db, Video, User
 from services.auth_service import get_current_user, get_current_user_from_query
 from services.video_processor import process_video_task, UPLOAD_DIR
+import yt_dlp
 
 router = APIRouter()
 
@@ -47,10 +48,83 @@ async def upload_video(
         
     return {"message": "Video uploaded successfully", "video_id": new_video.id, "status": "uploaded"}
 
+class YouTubeRequest(BaseModel):
+    url: str
+    title: str = ""
+    description: str = ""
+    tags: str = ""
+
+@router.post("/youtube")
+async def import_youtube(
+    data: YouTubeRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not data.url:
+        raise HTTPException(status_code=400, detail="YouTube URL is required")
+        
+    # Create DB record first to get an ID
+    new_video = Video(
+        owner_id=current_user.id, 
+        filename="youtube_importing.mp4",
+        title=data.title or "YouTube Import",
+        description=data.description,
+        tags=data.tags,
+        status="uploaded"
+    )
+    db.add(new_video)
+    db.commit()
+    db.refresh(new_video)
+    
+    # Download with yt-dlp
+    try:
+        output_filename = f"{new_video.id}_youtube.mp4"
+        output_path = os.path.join(UPLOAD_DIR, output_filename)
+        
+        ydl_opts = {
+            'format': 'best[ext=mp4]/best',
+            'outtmpl': output_path,
+            'quiet': True,
+            'no_warnings': True
+        }
+        
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(data.url, download=True)
+            if not data.title and info.get('title'):
+                new_video.title = info['title']
+                
+        new_video.filename = "youtube.mp4"
+        db.commit()
+        
+    except Exception as e:
+        db.delete(new_video)
+        db.commit()
+        raise HTTPException(status_code=500, detail=f"Failed to download YouTube video: {str(e)}")
+        
+    return {"message": "YouTube video imported successfully", "video_id": new_video.id, "status": "uploaded"}
+
+from db.mongodb import get_mongo_db
+
 @router.get("/")
-def get_videos(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+async def get_videos(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     videos = db.query(Video).filter(Video.owner_id == current_user.id).all()
-    return videos
+    
+    video_ids = [v.id for v in videos]
+    if not video_ids:
+        return []
+        
+    mongo_db = get_mongo_db()
+    summaries = await mongo_db.summaries.find({"video_id": {"$in": video_ids}}).to_list(length=None)
+    
+    keyword_map = {s["video_id"]: s.get("keywords", []) for s in summaries}
+    
+    result = []
+    for v in videos:
+        v_dict = {c.name: getattr(v, c.name) for c in v.__table__.columns}
+        v_dict["ai_keywords"] = keyword_map.get(v.id, [])
+        result.append(v_dict)
+        
+    return result
 
 @router.get("/{video_id}")
 def get_video(video_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -131,6 +205,7 @@ def delete_video(video_id: int, current_user: User = Depends(get_current_user), 
 class ProcessOptions(BaseModel):
     generate_transcript: bool = True
     generate_summary: bool = True
+    generate_key_moments: bool = True
 
 @router.post("/{video_id}/process")
 def process_video(

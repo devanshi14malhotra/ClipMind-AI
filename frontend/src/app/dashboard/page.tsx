@@ -21,10 +21,11 @@ export default function Dashboard() {
       }
       setToken(storedToken);
       try {
-        const res = await fetch("http://127.0.0.1:8000/api/video/", {
+        const res = await fetch(`http://127.0.0.1:8000/api/video/?t=${Date.now()}`, {
           headers: {
             "Authorization": `Bearer ${storedToken}`
-          }
+          },
+          cache: "no-store"
         });
         if (res.ok) {
           const data = await res.json();
@@ -39,23 +40,31 @@ export default function Dashboard() {
     fetchVideos();
   }, [router]);
 
+  const completedCount = videos.filter(v => v.status === "completed").length;
+  // A rough estimate: 15 mins saved per completed video
+  const hoursSaved = Math.round((completedCount * 15) / 60);
   const quickStats = [
     { title: "Total Videos", value: videos.length.toString(), icon: "video_library", increase: "Your library size" },
-    { title: "Summaries Generated", value: videos.filter(v => v.status === "completed").length.toString(), icon: "auto_awesome", increase: "Coming soon" },
-    { title: "Watch Time Saved", value: "0h", icon: "timer", increase: "Milestone 2" },
+    { title: "Summaries Generated", value: completedCount.toString(), icon: "auto_awesome", increase: "AI Insights Ready" },
+    { title: "Watch Time Saved", value: `${hoursSaved}h+`, icon: "timer", increase: "Time Reclaimed" },
   ];
 
   const uniqueTags = Array.from(
     new Set(
-      videos.flatMap((v) => (v.tags ? v.tags.split(",").map((t: string) => t.trim().toLowerCase()) : []))
+      videos.flatMap((v) => {
+        const userTags = v.tags ? v.tags.split(",").map((t: string) => t.trim().toLowerCase()) : [];
+        const aiTags = v.ai_keywords ? v.ai_keywords.map((t: string) => t.trim().toLowerCase()) : [];
+        return [...userTags, ...aiTags];
+      })
     )
   ).filter(Boolean);
 
   const filteredVideos = selectedTag
     ? videos.filter((v) => {
-        if (!v.tags) return false;
-        const vTags = v.tags.split(",").map((t: string) => t.trim().toLowerCase());
-        return vTags.includes(selectedTag.toLowerCase());
+        const userTags = v.tags ? v.tags.split(",").map((t: string) => t.trim().toLowerCase()) : [];
+        const aiTags = v.ai_keywords ? v.ai_keywords.map((t: string) => t.trim().toLowerCase()) : [];
+        const allTags = [...userTags, ...aiTags];
+        return allTags.includes(selectedTag.toLowerCase());
       })
     : videos;
 

@@ -20,10 +20,11 @@ async def process_video_task(file_path: str, video_id: int, db_session, options)
         
         # Run AI Pipeline
         audio_path = f"{UPLOAD_DIR}/audio_{video_id}.mp3"
-        transcript_segments, full_text, summary_text, key_moments = run_ai_pipeline(
+        transcript_segments, full_text, summary_text, key_moments, keywords = run_ai_pipeline(
             file_path, audio_path, 
             generate_transcript=options.generate_transcript, 
-            generate_summary=options.generate_summary
+            generate_summary=options.generate_summary,
+            generate_key_moments=getattr(options, 'generate_key_moments', False)
         )
 
         # Store in MongoDB
@@ -31,18 +32,32 @@ async def process_video_task(file_path: str, video_id: int, db_session, options)
         mongo_db = get_mongo_db()
         
         if options.generate_transcript:
-            await mongo_db.transcripts.insert_one({
-                "video_id": video_id,
-                "segments": transcript_segments,
-                "full_text": full_text
-            })
+            await mongo_db.transcripts.update_one(
+                {"video_id": video_id},
+                {"$set": {
+                    "segments": transcript_segments,
+                    "full_text": full_text
+                }},
+                upsert=True
+            )
             
-        if options.generate_summary:
-            await mongo_db.summaries.insert_one({
-                "video_id": video_id,
-                "summary": summary_text,
-                "key_moments": key_moments
-            })
+        gen_summary = options.generate_summary
+        gen_key_moments = getattr(options, 'generate_key_moments', False)
+        
+        if gen_summary or gen_key_moments:
+            update_data = {}
+            if gen_summary:
+                update_data["summary"] = summary_text
+            if gen_key_moments:
+                update_data["key_moments"] = key_moments
+            if gen_summary or gen_key_moments:
+                update_data["keywords"] = keywords
+                
+            await mongo_db.summaries.update_one(
+                {"video_id": video_id},
+                {"$set": update_data},
+                upsert=True
+            )
         
         # Update database status
         from db.database import Video

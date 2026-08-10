@@ -9,3 +9,5 @@ python-jose[cryptography]
 python-multipart
 ffmpeg-python
 pydantic-settings
+yt-dlp
+groq

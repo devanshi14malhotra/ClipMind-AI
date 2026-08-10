@@ -53,32 +53,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const role = user?.role || "content_creator";
     
     const commonSettings = { href: "/dashboard/settings", icon: "settings", label: "Settings" };
+    const topicsLibrary = { href: "/dashboard/topics", icon: "library_books", label: "Topics Library" };
+    const analyticsDash = { href: "/dashboard/analytics", icon: "analytics", label: "Analytics" };
+    const myLibrary = { href: "/dashboard", icon: "video_library", label: "My Library" };
     
     switch (role) {
       case "administrator":
         return [
-          { href: "/dashboard", icon: "video_library", label: "My Library" },
+          myLibrary,
+          analyticsDash,
+          topicsLibrary,
           { href: "/dashboard/admin/users", icon: "manage_accounts", label: "User Management" },
           { href: "/dashboard/admin/activity", icon: "monitoring", label: "Platform Activity" },
           commonSettings
         ];
       case "learner":
-        return [
-          { href: "/dashboard", icon: "video_library", label: "My Library" },
-          { href: "/dashboard/bookmarks", icon: "bookmark", label: "Bookmarks" },
-          commonSettings
-        ];
       case "educator":
-        return [
-          { href: "/dashboard", icon: "video_library", label: "My Library" },
-          { href: "/dashboard/analytics", icon: "analytics", label: "Classroom Analytics" },
-          commonSettings
-        ];
       case "content_creator":
       default:
         return [
-          { href: "/dashboard", icon: "video_library", label: "My Library" },
-          { href: "/dashboard/analytics", icon: "analytics", label: "Analytics" },
+          myLibrary,
+          analyticsDash,
+          topicsLibrary,
           commonSettings
         ];
     }
