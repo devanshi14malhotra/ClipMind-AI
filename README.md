@@ -42,8 +42,22 @@ If you wish to run the project locally using Docker Compose:
    cd ClipMind-AI
    ```
 2. Create a `.env` file in the `backend/` directory based on `.env.example` containing your API keys (Groq, Postgres, MongoDB).
-3. Run with Docker Compose:
+
+3. **Run the Backend:**
+   Open a terminal and start the FastAPI server:
    ```bash
-   docker-compose up --build
+   cd backend
+   # Activate your virtual environment (if using one)
+   pip install -r requirements.txt
+   uvicorn main:app --reload
    ```
-4. Access the frontend at `http://localhost:3000` and backend at `http://localhost:8000`.
+
+4. **Run the Frontend:**
+   Open a new terminal and start the Next.js development server:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+5. Access the frontend at `http://localhost:3000` and backend at `http://localhost:8000`.
