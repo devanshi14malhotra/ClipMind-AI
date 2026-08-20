@@ -76,13 +76,15 @@ async def process_video_task(file_path: str, video_id: int, options):
             db_session.commit()
             
     except Exception as e:
-        print(f"Error processing video: {e}")
-        from db.database import Video
+        import traceback
+        traceback.print_exc()
+        
+        # Update status to failed instead of deleting
         video = db_session.query(Video).filter(Video.id == video_id).first()
         if video:
-            db_session.delete(video)
+            video.status = "failed"
             db_session.commit()
-            if os.path.exists(file_path):
-                os.remove(file_path)
+        if os.path.exists(file_path):
+            os.remove(file_path)
     finally:
         db_session.close()

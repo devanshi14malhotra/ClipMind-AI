@@ -1,7 +1,6 @@
 import os
 import sys
-import static_ffmpeg
-static_ffmpeg.add_paths()
+
 from dotenv import load_dotenv
 
 if not os.getenv("TESTING"):
