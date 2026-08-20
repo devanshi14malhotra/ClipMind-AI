@@ -98,7 +98,7 @@ export default function AnalyticsPage() {
                 <BarChart data={data.top_keywords} layout="vertical" margin={{ top: 0, right: 30, left: 20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" horizontal={false} />
                   <XAxis type="number" stroke="#ffffff50" tick={{ fill: '#ffffff50', fontSize: 12 }} />
-                  <YAxis type="category" dataKey="keyword" stroke="#ffffff50" width={100} tick={{ fill: '#ffffff90', fontSize: 12, textTransform: 'capitalize' }} />
+                  <YAxis type="category" dataKey="keyword" stroke="#ffffff50" width={100} tick={{ fill: '#ffffff90', fontSize: 12 }} tickFormatter={(value) => typeof value === 'string' ? value.charAt(0).toUpperCase() + value.slice(1) : value} />
                   <Tooltip 
                     cursor={{ fill: '#ffffff05' }}
                     contentStyle={{ backgroundColor: '#0f0f15', borderColor: '#ffffff10', borderRadius: '12px', color: '#fff', boxShadow: '0 4px 20px rgba(0,0,0,0.5)' }}
