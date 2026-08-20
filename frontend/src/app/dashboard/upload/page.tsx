@@ -30,13 +30,13 @@ export default function UploadPage() {
       const token = localStorage.getItem("token");
       if (!token) return;
       try {
-        const res = await fetch("\${API_URL}/api/auth/me", {
+        const res = await fetch(`${API_URL}/api/auth/me`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) {
           const user = await res.json();
           if (user.role === "educator") {
-            const classRes = await fetch("\${API_URL}/api/classroom/educator", {
+            const classRes = await fetch(`${API_URL}/api/classroom/educator`, {
               headers: { "Authorization": `Bearer ${token}` }
             });
             if (classRes.ok) {
@@ -127,7 +127,7 @@ export default function UploadPage() {
 
       let res;
       if (uploadMethod === 'local') {
-        res = await fetch("\${API_URL}/api/video/upload", {
+        res = await fetch(`${API_URL}/api/video/upload`, {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${token}`
@@ -135,7 +135,7 @@ export default function UploadPage() {
           body: formData,
         });
       } else {
-        res = await fetch("\${API_URL}/api/video/youtube", {
+        res = await fetch(`${API_URL}/api/video/youtube`, {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${token}`,
@@ -190,7 +190,7 @@ export default function UploadPage() {
     
     try {
       const token = localStorage.getItem("token");
-      await fetch(`\${API_URL}/api/video/${videoId}/process`, {
+      await fetch(`${API_URL}/api/video/${videoId}/process`, {
         method: "POST",
         headers: { 
           "Authorization": `Bearer ${token}`,
@@ -207,7 +207,7 @@ export default function UploadPage() {
       setTimeout(() => setProcessSteps(prev => [...prev, "Generating Multi-Paragraph Summary..."]), 4500);
       
       const pollInterval = setInterval(async () => {
-        const res = await fetch(`\${API_URL}/api/video/${videoId}`, {
+        const res = await fetch(`${API_URL}/api/video/${videoId}`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) {

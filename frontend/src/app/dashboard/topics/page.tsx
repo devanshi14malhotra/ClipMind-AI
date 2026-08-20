@@ -18,7 +18,7 @@ export default function TopicsPage() {
         return;
       }
       try {
-        const res = await fetch("\${API_URL}/api/video/", {
+        const res = await fetch(`${API_URL}/api/video/`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) {
@@ -93,7 +93,7 @@ export default function TopicsPage() {
               <Link href={`/dashboard/video/${video.id}`} key={video.id} className="group cursor-pointer">
                 <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 mb-3 bg-black shadow-lg flex items-center justify-center">
                   {video.thumbnail_url ? (
-                    <img src={`\${API_URL}/${video.thumbnail_url}`} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-60 group-hover:opacity-100" />
+                    <img src={`${API_URL}/${video.thumbnail_url}`} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-60 group-hover:opacity-100" />
                   ) : (
                     <div className="w-full h-full bg-gray-800 flex items-center justify-center">
                       <span className="material-symbols-outlined text-4xl text-white/20">movie</span>
@@ -137,7 +137,7 @@ export default function TopicsPage() {
                    {topic.videos.slice(0, 4).map((v, j) => (
                       <div key={j} className="h-10 w-10 rounded-full ring-2 ring-[#0F0F13] bg-gradient-to-tr from-gray-800 to-gray-700 flex items-center justify-center text-xs font-bold text-white overflow-hidden shadow-md" title={v.title}>
                          {v.thumbnail_url ? (
-                           <img src={`\${API_URL}/${v.thumbnail_url}`} alt={v.title} className="w-full h-full object-cover" />
+                           <img src={`${API_URL}/${v.thumbnail_url}`} alt={v.title} className="w-full h-full object-cover" />
                          ) : (
                            v.title ? v.title.charAt(0).toUpperCase() : 'V'
                          )}

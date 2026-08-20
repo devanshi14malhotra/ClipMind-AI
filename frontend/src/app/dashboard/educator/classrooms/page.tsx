@@ -17,7 +17,7 @@ export default function EducatorClassroomsPage() {
     const token = localStorage.getItem("token");
     if (!token) return router.push("/login");
     try {
-      const res = await fetch("\${API_URL}/api/classroom/educator", {
+      const res = await fetch(`${API_URL}/api/classroom/educator`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -34,7 +34,7 @@ export default function EducatorClassroomsPage() {
     if (!newClassName.trim()) return;
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch("\${API_URL}/api/classroom/create", {
+      const res = await fetch(`${API_URL}/api/classroom/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -54,7 +54,7 @@ export default function EducatorClassroomsPage() {
   const toggleEnrollment = async (id: number) => {
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch(`\${API_URL}/api/classroom/${id}/toggle`, {
+      const res = await fetch(`${API_URL}/api/classroom/${id}/toggle`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` }
       });

@@ -23,7 +23,7 @@ export default function Dashboard() {
       }
       setToken(storedToken);
       try {
-        const userRes = await fetch("\${API_URL}/api/auth/me", {
+        const userRes = await fetch(`${API_URL}/api/auth/me`, {
           headers: { "Authorization": `Bearer ${storedToken}` }
         });
         if (userRes.ok) {
@@ -38,11 +38,11 @@ export default function Dashboard() {
         }
         
         const [videoRes, analyticsRes] = await Promise.all([
-          fetch(`\${API_URL}/api/video/?t=${Date.now()}`, {
+          fetch(`${API_URL}/api/video/?t=${Date.now()}`, {
             headers: { "Authorization": `Bearer ${storedToken}` },
             cache: "no-store"
           }),
-          fetch(`\${API_URL}/api/analytics/`, {
+          fetch(`${API_URL}/api/analytics/`, {
             headers: { "Authorization": `Bearer ${storedToken}` },
             cache: "no-store"
           })
@@ -217,7 +217,7 @@ export default function Dashboard() {
               <Link href={`/dashboard/video/${video.id}`} key={video.id} className="group cursor-pointer">
                 <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 mb-3 bg-black shadow-lg flex items-center justify-center">
                   <video 
-                    src={token ? `\${API_URL}/api/video/stream/${video.id}?token=${token}#t=0.1` : ''} 
+                    src={token ? `${API_URL}/api/video/stream/${video.id}?token=${token}#t=0.1` : ''} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-60 group-hover:opacity-100" 
                     preload="metadata"
                   />

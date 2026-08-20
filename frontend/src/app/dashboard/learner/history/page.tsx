@@ -14,7 +14,7 @@ export default function WatchHistory() {
       const token = localStorage.getItem("token");
       if (!token) return router.push("/login");
       try {
-        const res = await fetch(`\${API_URL}/api/learner/history`, {
+        const res = await fetch(`${API_URL}/api/learner/history`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) setVideos(await res.json());

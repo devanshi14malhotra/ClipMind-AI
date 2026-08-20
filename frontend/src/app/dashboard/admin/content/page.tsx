@@ -18,7 +18,7 @@ export default function AdminContentPage() {
     const token = localStorage.getItem("token");
     if (!token) return router.push("/login");
     try {
-      const res = await fetch("\${API_URL}/api/admin/videos", {
+      const res = await fetch(`${API_URL}/api/admin/videos`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) setVideos(await res.json());
@@ -34,7 +34,7 @@ export default function AdminContentPage() {
     if (!confirm("Are you sure you want to permanently delete this video? This action cannot be undone.")) return;
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch(`\${API_URL}/api/admin/videos/${videoId}`, {
+      const res = await fetch(`${API_URL}/api/admin/videos/${videoId}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });

@@ -16,7 +16,7 @@ export default function UploadHistoryPage() {
       if (!storedToken) return router.push("/login");
       setToken(storedToken);
       try {
-        const res = await fetch(`\${API_URL}/api/video/?t=${Date.now()}`, {
+        const res = await fetch(`${API_URL}/api/video/?t=${Date.now()}`, {
           headers: { "Authorization": `Bearer ${storedToken}` },
           cache: "no-store"
         });

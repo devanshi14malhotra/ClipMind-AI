@@ -19,7 +19,7 @@ export default function LearnerClassroomsPage() {
     const token = localStorage.getItem("token");
     if (!token) return router.push("/login");
     try {
-      const res = await fetch("\${API_URL}/api/classroom/learner", {
+      const res = await fetch(`${API_URL}/api/classroom/learner`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -37,7 +37,7 @@ export default function LearnerClassroomsPage() {
     setErrorMsg("");
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch("\${API_URL}/api/classroom/join", {
+      const res = await fetch(`${API_URL}/api/classroom/join`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

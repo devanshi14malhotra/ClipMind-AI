@@ -16,7 +16,7 @@ export default function AdminAuditLogsPage() {
     const token = localStorage.getItem("token");
     if (!token) return router.push("/login");
     try {
-      const res = await fetch("\${API_URL}/api/admin/audit-logs", {
+      const res = await fetch(`${API_URL}/api/admin/audit-logs`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) setLogs(await res.json());

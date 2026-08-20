@@ -24,7 +24,7 @@ export default function AdminUsersPage() {
     const token = localStorage.getItem("token");
     if (!token) return router.push("/login");
     try {
-      const res = await fetch("\${API_URL}/api/admin/users", {
+      const res = await fetch(`${API_URL}/api/admin/users`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) setUsers(await res.json());
@@ -38,7 +38,7 @@ export default function AdminUsersPage() {
   const handleRoleChange = async (userId: number, newRole: string) => {
     const token = localStorage.getItem("token");
     try {
-      await fetch(`\${API_URL}/api/admin/users/${userId}/role`, {
+      await fetch(`${API_URL}/api/admin/users/${userId}/role`, {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -56,7 +56,7 @@ export default function AdminUsersPage() {
     if (!confirm("Are you sure you want to completely delete this user and all their associated data? This cannot be undone.")) return;
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch(`\${API_URL}/api/admin/users/${userId}`, {
+      const res = await fetch(`${API_URL}/api/admin/users/${userId}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`

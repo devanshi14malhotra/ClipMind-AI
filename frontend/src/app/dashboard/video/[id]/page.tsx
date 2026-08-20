@@ -225,7 +225,7 @@ export default function VideoSummaryPage({ params }: { params: Promise<{ id: str
         fetch(`${API_URL}/api/video/${resolvedParams.id}?t=${Date.now()}`, { headers: { Authorization: `Bearer ${storedToken}` }, cache: "no-store" }),
         fetch(`${API_URL}/api/insights/transcript/${resolvedParams.id}?t=${Date.now()}`, { headers: { Authorization: `Bearer ${storedToken}` }, cache: "no-store" }),
         fetch(`${API_URL}/api/insights/summary/${resolvedParams.id}?t=${Date.now()}`, { headers: { Authorization: `Bearer ${storedToken}` }, cache: "no-store" }),
-        fetch("${API_URL}/api/auth/me", { headers: { Authorization: `Bearer ${storedToken}` } }),
+        fetch(`${API_URL}/api/auth/me`, { headers: { Authorization: `Bearer ${storedToken}` } }),
       ]);
 
       if (videoRes.ok) setVideo(await videoRes.json());

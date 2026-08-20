@@ -17,7 +17,7 @@ export default function AnalyticsPage() {
         return;
       }
       try {
-        const res = await fetch(`\${API_URL}/api/analytics?t=${Date.now()}`, {
+        const res = await fetch(`${API_URL}/api/analytics?t=${Date.now()}`, {
           headers: { Authorization: `Bearer ${token}` },
           cache: "no-store"
         });

@@ -21,7 +21,7 @@ export default function SettingsPage() {
       const token = localStorage.getItem("token");
       if (!token) { router.push("/login"); return; }
       try {
-        const res = await fetch("\${API_URL}/api/auth/me", {
+        const res = await fetch(`${API_URL}/api/auth/me`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) {
@@ -52,7 +52,7 @@ export default function SettingsPage() {
     setSaveMsg(null);
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch("\${API_URL}/api/auth/me", {
+      const res = await fetch(`${API_URL}/api/auth/me`, {
         method: "PUT",
         headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ name: editName.trim(), current_password: currentPassword, new_password: newPassword })

@@ -21,7 +21,7 @@ export default function AdminJobsPage() {
     const token = localStorage.getItem("token");
     if (!token) return router.push("/login");
     try {
-      const res = await fetch("\${API_URL}/api/admin/videos", {
+      const res = await fetch(`${API_URL}/api/admin/videos`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) setJobs(await res.json());

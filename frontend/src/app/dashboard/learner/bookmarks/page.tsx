@@ -14,7 +14,7 @@ export default function Bookmarks() {
       const token = localStorage.getItem("token");
       if (!token) return router.push("/login");
       try {
-        const res = await fetch(`\${API_URL}/api/learner/bookmarks`, {
+        const res = await fetch(`${API_URL}/api/learner/bookmarks`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) setVideos(await res.json());

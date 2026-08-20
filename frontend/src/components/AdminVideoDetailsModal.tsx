@@ -10,7 +10,7 @@ export default function AdminVideoDetailsModal({ videoId, onClose }: { videoId: 
     const fetchDetails = async () => {
       const token = localStorage.getItem("token");
       try {
-        const res = await fetch(`\${API_URL}/api/admin/videos/${videoId}/details`, {
+        const res = await fetch(`${API_URL}/api/admin/videos/${videoId}/details`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) setDetails(await res.json());

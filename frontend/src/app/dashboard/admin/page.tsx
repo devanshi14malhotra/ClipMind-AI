@@ -15,7 +15,7 @@ export default function AdminDashboard() {
       const token = localStorage.getItem("token");
       if (!token) return router.push("/login");
       try {
-        const res = await fetch(`\${API_URL}/api/admin/system-stats`, {
+        const res = await fetch(`${API_URL}/api/admin/system-stats`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) setStats(await res.json());
