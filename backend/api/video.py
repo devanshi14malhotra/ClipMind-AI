@@ -110,6 +110,7 @@ async def import_youtube(
             'format': 'best[ext=mp4]/best',
             'outtmpl': output_path,
             'quiet': True,
+            'overwrites': True,
             'no_warnings': True,
             'extractor_args': {'youtube': {'player_client': ['android', 'web']}}
         }
