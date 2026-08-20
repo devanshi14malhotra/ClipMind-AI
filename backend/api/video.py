@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional
-from db.database import get_db, Video, User
+from db.database import get_db, Video, User, LearningHistory, Bookmark
 from services.auth_service import get_current_user, get_current_user_from_query
 from services.video_processor import process_video_task, UPLOAD_DIR
 import yt_dlp
@@ -233,7 +233,14 @@ def delete_video(video_id: int, current_user: User = Depends(get_current_user), 
         
     file_path = os.path.join(UPLOAD_DIR, f"{video.id}_{video.filename}")
     if os.path.exists(file_path):
-        os.remove(file_path)
+        try:
+            os.remove(file_path)
+        except Exception:
+            pass # Ignore file lock errors if video is still processing
+            
+    # Delete related records first to avoid foreign key constraints
+    db.query(LearningHistory).filter(LearningHistory.video_id == video_id).delete()
+    db.query(Bookmark).filter(Bookmark.video_id == video_id).delete()
         
     db.delete(video)
     db.commit()
