@@ -107,7 +107,9 @@ export default function UploadPage() {
     }
 
     const formData = new FormData();
-    formData.append("file", selectedFile);
+    if (selectedFile) {
+      formData.append("file", selectedFile);
+    }
     formData.append("title", title);
     formData.append("description", description);
     formData.append("tags", tags.join(","));
