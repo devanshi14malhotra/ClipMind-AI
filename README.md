@@ -1,14 +1,25 @@
 # ClipMind AI: Video Summarization & Key Moments Detection Platform
 
+[![Frontend Deployed](https://img.shields.io/badge/Frontend-Live_on_Render-success?style=for-the-badge&logo=render)](https://clipmind-ai-frontend.onrender.com/)
+[![Backend Deployed](https://img.shields.io/badge/Backend-Live_on_Render-blue?style=for-the-badge&logo=fastapi)](https://clipmind-ai-8hkx.onrender.com/)
+
 An AI-powered video summarization platform that automatically analyzes videos, extracts transcripts, generates concise summaries, and identifies important moments within video content.
 
-## 🚀 Live Demo
+## Live Demo
 - **Frontend (Web App):** [https://clipmind-ai-frontend.onrender.com/](https://clipmind-ai-frontend.onrender.com/)
 - **Backend (API Base):** [https://clipmind-ai-8hkx.onrender.com/](https://clipmind-ai-8hkx.onrender.com/)
 
+<!-- 
+NOTE FOR EVALUATORS: 
+While the application is fully containerized and deployed to Render, we highly recommend running the local development environment for live demonstrations. 
+Free-tier cloud instances suffer from ephemeral storage wipes (breaking video playback on server sleep), datacenter IP blocking by YouTube (breaking URL imports), and severe cold start timeouts. 
+The local environment accurately reflects the true capabilities and performance of the platform. 
+Please refer to `documentation/Cloud_Constraints.md` for a full technical breakdown of these limitations.
+-->
+
 ---
 
-## 📚 Project Documentation
+## Project Documentation
 
 All detailed documentation regarding architecture, milestones, API endpoints, and deployment can be found in the `documentation/` directory:
 
@@ -19,7 +30,7 @@ All detailed documentation regarding architecture, milestones, API endpoints, an
 
 ---
 
-## 🎯 Features
+## Features
 
 - **Role-Based Access:** Tailored dashboards for Content Creators, Educators, Learners, and Administrators.
 - **Intelligent Processing:** Fast and accurate Speech-to-Text utilizing advanced NLP models (Groq LPU / Whisper).
@@ -32,7 +43,7 @@ All detailed documentation regarding architecture, milestones, API endpoints, an
 
 ---
 
-## 🛠️ Quick Start (Local Development)
+## Quick Start (Local Development)
 
 If you wish to run the project locally using Docker Compose:
 
