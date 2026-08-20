@@ -7,7 +7,7 @@ An AI-powered video summarization platform that automatically analyzes videos, e
 
 ## Live Demo
 - **Frontend (Web App):** [https://clipmind-ai-frontend.onrender.com/](https://clipmind-ai-frontend.onrender.com/)
-- **Backend (API Base):** [https://clipmind-ai-8hkx.onrender.com/](https://clipmind-ai-8hkx.onrender.com/)
+- **Backend docs (API Base):** [https://clipmind-ai-8hkx.onrender.com/](https://clipmind-ai-8hkx.onrender.com/docs)
 
 <!-- 
 NOTE FOR EVALUATORS: 
