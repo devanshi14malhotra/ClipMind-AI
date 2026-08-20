@@ -176,10 +176,10 @@ export default function UploadPage() {
         });
       }, 500);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Upload error:", error);
       setUploadProgress(0);
-      alert("Upload failed. Make sure the backend is running.");
+      alert(error.message || "Upload failed.");
     }
   };
 
