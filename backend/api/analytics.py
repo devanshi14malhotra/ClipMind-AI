@@ -25,7 +25,8 @@ async def get_analytics(current_user = Depends(get_current_user), db: Session = 
             "processed_videos": 0,
             "total_key_moments": 0,
             "top_keywords": [],
-            "total_duration_minutes": 0.0
+            "total_duration_minutes": 0.0,
+            "summaries_generated": 0
         }
     
     mongo_db = get_mongo_db()
@@ -56,6 +57,7 @@ async def get_analytics(current_user = Depends(get_current_user), db: Session = 
     return {
         "total_videos": total_videos,
         "processed_videos": processed_videos,
+        "summaries_generated": len(summaries),
         "total_key_moments": total_key_moments,
         "top_keywords": top_keywords,
         "total_duration_minutes": round(total_duration_seconds / 60, 2)

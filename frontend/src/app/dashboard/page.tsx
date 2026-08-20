@@ -2,9 +2,11 @@
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { API_URL } from "@/lib/api";
 
 export default function Dashboard() {
   const [videos, setVideos] = useState<any[]>([]);
+  const [analytics, setAnalytics] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isDateOpen, setIsDateOpen] = useState(false);
@@ -21,15 +23,38 @@ export default function Dashboard() {
       }
       setToken(storedToken);
       try {
-        const res = await fetch(`http://127.0.0.1:8000/api/video/?t=${Date.now()}`, {
-          headers: {
-            "Authorization": `Bearer ${storedToken}`
-          },
-          cache: "no-store"
+        const userRes = await fetch("\${API_URL}/api/auth/me", {
+          headers: { "Authorization": `Bearer ${storedToken}` }
         });
-        if (res.ok) {
-          const data = await res.json();
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          if (userData.role === "learner") {
+            router.push("/dashboard/learner/classrooms");
+            return;
+          } else if (userData.role === "administrator") {
+            router.push("/dashboard/admin");
+            return;
+          }
+        }
+        
+        const [videoRes, analyticsRes] = await Promise.all([
+          fetch(`\${API_URL}/api/video/?t=${Date.now()}`, {
+            headers: { "Authorization": `Bearer ${storedToken}` },
+            cache: "no-store"
+          }),
+          fetch(`\${API_URL}/api/analytics/`, {
+            headers: { "Authorization": `Bearer ${storedToken}` },
+            cache: "no-store"
+          })
+        ]);
+
+        if (videoRes.ok) {
+          const data = await videoRes.json();
           setVideos(data.filter((v: any) => v.status !== "failed"));
+        }
+        if (analyticsRes.ok) {
+          const analyticsData = await analyticsRes.json();
+          setAnalytics(analyticsData);
         }
       } catch (e) {
         console.error("Failed to fetch videos", e);
@@ -41,20 +66,31 @@ export default function Dashboard() {
   }, [router]);
 
   const completedCount = videos.filter(v => v.status === "completed").length;
-  // A rough estimate: 15 mins saved per completed video
-  const hoursSaved = Math.round((completedCount * 15) / 60);
+  // Calculate exact time saved based on transcript durations
+  const totalDurationMinutes = analytics?.total_duration_minutes || 0;
+  
+  let watchTimeSavedDisplay = "0m";
+  if (totalDurationMinutes >= 60) {
+    const hours = Math.floor(totalDurationMinutes / 60);
+    const mins = Math.round(totalDurationMinutes % 60);
+    watchTimeSavedDisplay = mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+  } else if (totalDurationMinutes > 0) {
+    watchTimeSavedDisplay = `${Math.round(totalDurationMinutes)}m`;
+  } else if (completedCount > 0) {
+    // Fallback if transcripts are still processing but marked completed
+    watchTimeSavedDisplay = `${Math.round(completedCount * 15)}m`;
+  }
+
   const quickStats = [
     { title: "Total Videos", value: videos.length.toString(), icon: "video_library", increase: "Your library size" },
-    { title: "Summaries Generated", value: completedCount.toString(), icon: "auto_awesome", increase: "AI Insights Ready" },
-    { title: "Watch Time Saved", value: `${hoursSaved}h+`, icon: "timer", increase: "Time Reclaimed" },
+    { title: "Summaries Generated", value: (analytics?.summaries_generated ?? 0).toString(), icon: "auto_awesome", increase: "AI Insights Ready" },
+    { title: "Watch Time Saved", value: watchTimeSavedDisplay, icon: "timer", increase: "Time Reclaimed" },
   ];
 
   const uniqueTags = Array.from(
     new Set(
       videos.flatMap((v) => {
-        const userTags = v.tags ? v.tags.split(",").map((t: string) => t.trim().toLowerCase()) : [];
-        const aiTags = v.ai_keywords ? v.ai_keywords.map((t: string) => t.trim().toLowerCase()) : [];
-        return [...userTags, ...aiTags];
+        return v.tags ? v.tags.split(",").map((t: string) => t.trim().toLowerCase()) : [];
       })
     )
   ).filter(Boolean);
@@ -62,9 +98,7 @@ export default function Dashboard() {
   const filteredVideos = selectedTag
     ? videos.filter((v) => {
         const userTags = v.tags ? v.tags.split(",").map((t: string) => t.trim().toLowerCase()) : [];
-        const aiTags = v.ai_keywords ? v.ai_keywords.map((t: string) => t.trim().toLowerCase()) : [];
-        const allTags = [...userTags, ...aiTags];
-        return allTags.includes(selectedTag.toLowerCase());
+        return userTags.includes(selectedTag.toLowerCase());
       })
     : videos;
 
@@ -183,7 +217,7 @@ export default function Dashboard() {
               <Link href={`/dashboard/video/${video.id}`} key={video.id} className="group cursor-pointer">
                 <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 mb-3 bg-black shadow-lg flex items-center justify-center">
                   <video 
-                    src={token ? `http://127.0.0.1:8000/api/video/stream/${video.id}?token=${token}#t=0.1` : ''} 
+                    src={token ? `\${API_URL}/api/video/stream/${video.id}?token=${token}#t=0.1` : ''} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-60 group-hover:opacity-100" 
                     preload="metadata"
                   />
@@ -209,3 +243,4 @@ export default function Dashboard() {
     </>
   );
 }
+

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from 'recharts';
+import { API_URL } from "@/lib/api";
 
 export default function AnalyticsPage() {
   const [data, setData] = useState<any>(null);
@@ -16,7 +17,7 @@ export default function AnalyticsPage() {
         return;
       }
       try {
-        const res = await fetch(`http://127.0.0.1:8000/api/analytics?t=${Date.now()}`, {
+        const res = await fetch(`\${API_URL}/api/analytics?t=${Date.now()}`, {
           headers: { Authorization: `Bearer ${token}` },
           cache: "no-store"
         });
@@ -42,9 +43,17 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-8 py-8 mt-4">
-      <div className="flex flex-col gap-2 mb-8">
-        <h1 className="text-4xl font-bold text-white tracking-tight">Analytics Dashboard</h1>
-        <p className="text-text-secondary font-light">Monitor engagement and AI intelligence across your video content.</p>
+      <div className="flex justify-between items-end mb-8">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-4xl font-bold text-white tracking-tight">Analytics Dashboard</h1>
+          <p className="text-text-secondary font-light">Monitor engagement and AI intelligence across your video content.</p>
+        </div>
+        <button 
+          onClick={() => window.print()}
+          className="no-print glass-panel border border-white/10 px-6 py-3 rounded-xl text-white font-bold transition-all hover:bg-white/10 shadow-lg flex items-center gap-2"
+        >
+          <span className="material-symbols-outlined">picture_as_pdf</span> Download PDF Report
+        </button>
       </div>
 
       {/* Metrics Grid */}
@@ -156,3 +165,4 @@ function MetricCard({ title, value, icon, color }: { title: string, value: strin
     </div>
   );
 }
+

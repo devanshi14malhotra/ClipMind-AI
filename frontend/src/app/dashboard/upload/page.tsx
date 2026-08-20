@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { API_URL } from "@/lib/api";
 
 export default function UploadPage() {
   const [isDragging, setIsDragging] = useState(false);
@@ -19,8 +20,36 @@ export default function UploadPage() {
   const [wantTranscript, setWantTranscript] = useState(true);
   const [wantSummary, setWantSummary] = useState(true);
   const [wantKeyMoments, setWantKeyMoments] = useState(true);
+  const [classrooms, setClassrooms] = useState<any[]>([]);
+  const [selectedClassroomId, setSelectedClassroomId] = useState<string>("");
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  React.useEffect(() => {
+    const fetchClassrooms = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      try {
+        const res = await fetch("\${API_URL}/api/auth/me", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const user = await res.json();
+          if (user.role === "educator") {
+            const classRes = await fetch("\${API_URL}/api/classroom/educator", {
+              headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (classRes.ok) {
+              setClassrooms(await classRes.json());
+            }
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchClassrooms();
+  }, []);
 
   const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && tagInput.trim()) {
@@ -82,6 +111,9 @@ export default function UploadPage() {
     formData.append("title", title);
     formData.append("description", description);
     formData.append("tags", tags.join(","));
+    if (selectedClassroomId) {
+      formData.append("classroom_id", selectedClassroomId);
+    }
 
     setUploadProgress(10);
     try {
@@ -93,7 +125,7 @@ export default function UploadPage() {
 
       let res;
       if (uploadMethod === 'local') {
-        res = await fetch("http://127.0.0.1:8000/api/video/upload", {
+        res = await fetch("\${API_URL}/api/video/upload", {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${token}`
@@ -101,7 +133,7 @@ export default function UploadPage() {
           body: formData,
         });
       } else {
-        res = await fetch("http://127.0.0.1:8000/api/video/youtube", {
+        res = await fetch("\${API_URL}/api/video/youtube", {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${token}`,
@@ -111,7 +143,8 @@ export default function UploadPage() {
             url: youtubeUrl,
             title: title,
             description: description,
-            tags: tags.join(",")
+            tags: tags.join(","),
+            classroom_id: selectedClassroomId ? parseInt(selectedClassroomId) : null
           }),
         });
       }
@@ -155,7 +188,7 @@ export default function UploadPage() {
     
     try {
       const token = localStorage.getItem("token");
-      await fetch(`http://127.0.0.1:8000/api/video/${videoId}/process`, {
+      await fetch(`\${API_URL}/api/video/${videoId}/process`, {
         method: "POST",
         headers: { 
           "Authorization": `Bearer ${token}`,
@@ -172,7 +205,7 @@ export default function UploadPage() {
       setTimeout(() => setProcessSteps(prev => [...prev, "Generating Multi-Paragraph Summary..."]), 4500);
       
       const pollInterval = setInterval(async () => {
-        const res = await fetch(`http://127.0.0.1:8000/api/video/${videoId}`, {
+        const res = await fetch(`\${API_URL}/api/video/${videoId}`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) {
@@ -181,7 +214,16 @@ export default function UploadPage() {
             clearInterval(pollInterval);
             setProcessSteps(prev => [...prev, "Done! Redirecting..."]);
             setTimeout(() => router.push(`/dashboard/video/${videoId}`), 1000);
+          } else if (video.status === "failed") {
+            clearInterval(pollInterval);
+            alert("Video processing failed. Please check the backend logs.");
+            setIsProcessing(false);
           }
+        } else if (res.status === 404) {
+          clearInterval(pollInterval);
+          alert("Video processing failed. The video was removed.");
+          setIsProcessing(false);
+          setVideoId(null);
         }
       }, 2000);
     } catch (err) {
@@ -276,7 +318,7 @@ export default function UploadPage() {
             </div>
           )}
 
-          {uploadProgress > 0 && (
+          {uploadProgress > 0 && !videoId && (
             <div className="glass-panel p-6 rounded-2xl space-y-4 glow-effect">
               <div className="flex justify-between items-end">
                 <div className="flex items-center gap-2">
@@ -405,6 +447,22 @@ export default function UploadPage() {
                       <input value={tagInput} onChange={e => setTagInput(e.target.value)} onKeyDown={handleAddTag} className="flex-grow bg-transparent border-none focus:ring-0 text-sm py-1 outline-none text-white placeholder-text-tertiary" placeholder="Type and press Enter to add tags..." type="text" />
                     </div>
                   </div>
+                  
+                  {classrooms.length > 0 && (
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-text-secondary uppercase tracking-widest">Assign to Classroom (Optional)</label>
+                      <select 
+                        value={selectedClassroomId}
+                        onChange={(e) => setSelectedClassroomId(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:ring-1 focus:ring-accent focus:border-accent text-white outline-none transition-all appearance-none"
+                      >
+                        <option value="" className="bg-background text-white">None (Private Library)</option>
+                        {classrooms.map(c => (
+                          <option key={c.id} value={c.id} className="bg-background text-white">{c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
                 
                 <button 
@@ -426,3 +484,4 @@ export default function UploadPage() {
     </div>
   );
 }
+

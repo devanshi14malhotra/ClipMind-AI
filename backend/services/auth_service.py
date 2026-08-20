@@ -64,3 +64,17 @@ async def get_current_user_from_query(token: str, db: Session = Depends(get_db))
     if user is None:
         raise credentials_exception
     return user
+
+from typing import List
+
+class RoleChecker:
+    def __init__(self, allowed_roles: List[str]):
+        self.allowed_roles = allowed_roles
+
+    def __call__(self, user: User = Depends(get_current_user)):
+        if user.role not in self.allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Operation not permitted for your role"
+            )
+        return user

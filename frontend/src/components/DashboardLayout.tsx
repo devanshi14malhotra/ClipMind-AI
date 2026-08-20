@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import { API_URL } from "@/lib/api";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -18,7 +19,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         return;
       }
       try {
-        const res = await fetch("http://127.0.0.1:8000/api/auth/me", {
+        const res = await fetch("\${API_URL}/api/auth/me", {
           headers: {
             "Authorization": `Bearer ${token}`
           }
@@ -60,28 +61,43 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     switch (role) {
       case "administrator":
         return [
-          myLibrary,
-          analyticsDash,
-          topicsLibrary,
+          { href: "/dashboard/admin", icon: "analytics", label: "System Analytics" },
           { href: "/dashboard/admin/users", icon: "manage_accounts", label: "User Management" },
-          { href: "/dashboard/admin/activity", icon: "monitoring", label: "Platform Activity" },
+          { href: "/dashboard/admin/content", icon: "video_library", label: "Manage Content" },
+          { href: "/dashboard/admin/jobs", icon: "memory", label: "Processing Jobs" },
+          { href: "/dashboard/admin/audit-logs", icon: "monitoring", label: "Audit Logs" },
           commonSettings
         ];
       case "learner":
+        return [
+          { href: "/dashboard/learner/classrooms", icon: "school", label: "My Classrooms" },
+          { href: "/dashboard/learner/history", icon: "history", label: "Watch History" },
+          { href: "/dashboard/learner/bookmarks", icon: "bookmarks", label: "Bookmarks" },
+          commonSettings
+        ];
       case "educator":
+        return [
+          { href: "/dashboard/educator/classrooms", icon: "school", label: "Classrooms" },
+          myLibrary,
+          { href: "/dashboard/history", icon: "history", label: "Upload History" },
+          topicsLibrary,
+          commonSettings
+        ];
       case "content_creator":
       default:
         return [
           myLibrary,
           analyticsDash,
           topicsLibrary,
+          { href: "/dashboard/history", icon: "history", label: "Upload History" },
           commonSettings
         ];
     }
   };
 
   const sidebarLinks = getSidebarLinks();
-  const canUpload = true;
+  const canUpload = user?.role === "content_creator" || user?.role === "educator";
+  const dashboardHref = user?.role === "administrator" ? "/dashboard/admin" : user?.role === "learner" ? "/dashboard/learner/classrooms" : "/dashboard";
 
   if (isLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center">
@@ -102,7 +118,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <span className="hidden sm:block">ClipMind AI</span>
             </Link>
             <nav className="hidden md:flex items-center gap-6 ml-4">
-              <Link href="/dashboard" className={`font-bold pb-1 text-sm transition-colors duration-200 ${pathname === "/dashboard" ? "text-primary border-b-2 border-primary" : "text-text-secondary hover:text-white"}`}>Dashboard</Link>
+              <Link href={dashboardHref} className={`font-bold pb-1 text-sm transition-colors duration-200 ${pathname === dashboardHref ? "text-primary border-b-2 border-primary" : "text-text-secondary hover:text-white"}`}>Dashboard</Link>
             </nav>
           </div>
           
@@ -144,10 +160,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </span>
                 <div>
                   <h2 className="font-headline-md text-headline-md font-bold text-accent leading-none">
-                    {user?.role === 'administrator' ? 'Admin' : 'Library'}
+                    {user?.role === 'administrator' ? 'Admin' : user?.role === 'learner' ? 'Learning' : 'Library'}
                   </h2>
                   <p className="text-[10px] font-label-md text-text-secondary opacity-70 uppercase tracking-widest mt-1">
-                    {user?.role === 'administrator' ? 'System' : 'AI Assets'}
+                    {user?.role === 'administrator' ? 'System' : user?.role === 'learner' ? 'Platform' : 'AI Assets'}
                   </p>
                 </div>
               </Link>
@@ -197,3 +213,4 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     </div>
   );
 }
+

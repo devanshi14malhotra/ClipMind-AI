@@ -1,5 +1,5 @@
 fastapi
-uvicorn
+uvicorn[standard]
 sqlalchemy
 asyncpg
 psycopg2-binary
@@ -8,6 +8,10 @@ passlib[bcrypt]
 python-jose[cryptography]
 python-multipart
 ffmpeg-python
+static-ffmpeg
 pydantic-settings
 yt-dlp
 groq
+python-dotenv
+pytest
+httpx

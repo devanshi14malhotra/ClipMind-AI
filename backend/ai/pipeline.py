@@ -12,6 +12,7 @@ def run_ai_pipeline(video_path: str, audio_output_path: str, generate_transcript
     transcript_segments = []
     full_text = ""
     summary_text = "No summary generated."
+    short_summary_text = ""
     key_moments = []
     keywords = []
     
@@ -46,6 +47,7 @@ def run_ai_pipeline(video_path: str, audio_output_path: str, generate_transcript
         ai_results = groq_summarize(timestamped_text)
         if generate_summary:
             summary_text = ai_results.get("summary", "No summary generated.")
+            short_summary_text = ai_results.get("short_summary", "")
         if generate_key_moments:
             key_moments = ai_results.get("key_moments", [])
         if generate_summary or generate_key_moments:
@@ -55,4 +57,4 @@ def run_ai_pipeline(video_path: str, audio_output_path: str, generate_transcript
     if os.path.exists(audio_output_path):
         os.remove(audio_output_path)
         
-    return transcript_segments, full_text, summary_text, key_moments, keywords
+    return transcript_segments, full_text, summary_text, short_summary_text, key_moments, keywords

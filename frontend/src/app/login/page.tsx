@@ -2,6 +2,7 @@
 import Link from "next/link";
 import React, { useState } from "react";
 import { ArrowLeft, Sparkles } from "lucide-react";
+import { API_URL } from "@/lib/api";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -18,7 +19,7 @@ export default function LoginPage() {
       formData.append("username", email);
       formData.append("password", password);
 
-      const res = await fetch("http://127.0.0.1:8000/api/auth/login", {
+      const res = await fetch("\${API_URL}/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: formData.toString(),
@@ -71,10 +72,10 @@ export default function LoginPage() {
               <div className="mb-6">
                 <p className="text-xs text-text-secondary text-center mb-3 uppercase tracking-wider font-semibold">Demo Accounts</p>
                 <div className="grid grid-cols-2 gap-2">
-                  <button type="button" onClick={() => {setEmail('admin@clipmind.com'); setPassword('adminpassword');}} className="text-xs bg-white/5 hover:bg-white/10 border border-white/10 text-white py-2 rounded-lg transition-colors">Admin</button>
-                  <button type="button" onClick={() => {setEmail('creator@clipmind.com'); setPassword('password123');}} className="text-xs bg-white/5 hover:bg-white/10 border border-white/10 text-white py-2 rounded-lg transition-colors">Creator</button>
-                  <button type="button" onClick={() => {setEmail('learner@clipmind.com'); setPassword('password123');}} className="text-xs bg-white/5 hover:bg-white/10 border border-white/10 text-white py-2 rounded-lg transition-colors">Learner</button>
-                  <button type="button" onClick={() => {setEmail('educator@clipmind.com'); setPassword('password123');}} className="text-xs bg-white/5 hover:bg-white/10 border border-white/10 text-white py-2 rounded-lg transition-colors">Educator</button>
+                  <button type="button" onClick={() => {setEmail('admin@clipmind.com'); setPassword('admin123');}} className="text-xs bg-white/5 hover:bg-white/10 border border-white/10 text-white py-2 rounded-lg transition-colors">Admin</button>
+                  <button type="button" onClick={() => {setEmail('creator@clipmind.com'); setPassword('creator123');}} className="text-xs bg-white/5 hover:bg-white/10 border border-white/10 text-white py-2 rounded-lg transition-colors">Content Creator</button>
+                  <button type="button" onClick={() => {setEmail('learner@clipmind.com'); setPassword('learner123');}} className="text-xs bg-white/5 hover:bg-white/10 border border-white/10 text-white py-2 rounded-lg transition-colors">Learner</button>
+                  <button type="button" onClick={() => {setEmail('educator@clipmind.com'); setPassword('educator123');}} className="text-xs bg-white/5 hover:bg-white/10 border border-white/10 text-white py-2 rounded-lg transition-colors">Educator</button>
                 </div>
               </div>
 
@@ -125,3 +126,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

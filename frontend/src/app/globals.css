@@ -123,3 +123,32 @@ p {
 .delay-1 { animation-delay: 0.1s; }
 .delay-2 { animation-delay: 0.2s; }
 .delay-3 { animation-delay: 0.3s; }
+
+/* Print Styles for PDF Generation */
+@media print {
+  header, aside, button.no-print {
+    display: none !important;
+  }
+  body, .glass-panel, main, div {
+    background: white !important;
+    color: black !important;
+    border-color: #ccc !important;
+    box-shadow: none !important;
+  }
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  h1, h2, h3, h4, p, span, td, th {
+    color: black !important;
+  }
+  .ai-gradient-bg, .ai-gradient-text {
+    background: none !important;
+    color: black !important;
+    -webkit-text-fill-color: black !important;
+  }
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
