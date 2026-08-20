@@ -1,7 +1,7 @@
 # ClipMind AI: Video Summarization & Key Moments Detection Platform
 
 [![Frontend Deployed](https://img.shields.io/badge/Frontend-Live_on_Render-success?style=for-the-badge&logo=render)](https://clipmind-ai-frontend.onrender.com/)
-[![Backend Deployed](https://img.shields.io/badge/Backend-Live_on_Render-blue?style=for-the-badge&logo=fastapi)](https://clipmind-ai-8hkx.onrender.com/)
+[![Backend Deployed](https://img.shields.io/badge/Backend-Live_on_Render-blue?style=for-the-badge&logo=fastapi)](https://clipmind-ai-8hkx.onrender.com/docs)
 
 An AI-powered video summarization platform that automatically analyzes videos, extracts transcripts, generates concise summaries, and identifies important moments within video content.
 
