@@ -28,6 +28,44 @@ All detailed documentation regarding architecture, milestones, API endpoints, an
 3. **[Deployment Guide](./documentation/Deployment.md)** — Information on our Docker containerization and Render cloud hosting strategy.
 4. **[API Documentation](./documentation/API_Docs.md)** — Guide to the FastAPI backend endpoints (Auth, Video, AI Processing, Analytics).
 
+## System Architecture
+
+```mermaid
+graph TD
+    subgraph Frontend ["Frontend (Next.js)"]
+        UI[Dashboard UI]
+        Player[Interactive Video Player]
+    end
+
+    subgraph Backend ["Backend (FastAPI)"]
+        API[API Router]
+        Worker[Background Processor]
+        Audio[FFmpeg Extraction]
+        YTDLP[yt-dlp Downloader]
+    end
+
+    subgraph Databases ["Database Layer"]
+        SQL[(PostgreSQL\nUsers, Roles, Metadata)]
+        NoSQL[(MongoDB\nTranscripts, Summaries)]
+    end
+
+    subgraph AI ["Groq LPU API"]
+        Whisper[Whisper-V3 (Speech-to-Text)]
+        LLaMA[LLaMA-3 (Summarization)]
+    end
+
+    UI <-->|REST API Requests| API
+    API -->|Video Files / URLs| Worker
+    Worker -->|Import YouTube| YTDLP
+    Worker -->|Extract Audio MP3| Audio
+    Audio -->|Send Audio| Whisper
+    Whisper -->|Send Transcript| LLaMA
+    
+    API <-->|Store/Fetch structured data| SQL
+    Worker -->|Save JSON payloads| NoSQL
+    API <-->|Fetch AI Insights| NoSQL
+```
+
 ---
 
 ## Features
