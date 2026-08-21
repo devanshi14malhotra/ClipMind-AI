@@ -8,7 +8,6 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 from db.database import SessionLocal, Video
 
 async def process_video_task(file_path: str, video_id: int, options):
-    db_session = SessionLocal()
     try:
         # Extract thumbnail
         thumbnail_path = f"{UPLOAD_DIR}/thumb_{video_id}.jpg"
@@ -69,22 +68,30 @@ async def process_video_task(file_path: str, video_id: int, options):
             )
         
         # Update database status
-        from db.database import Video
-        video = db_session.query(Video).filter(Video.id == video_id).first()
-        if video:
-            video.status = "completed"
-            db_session.commit()
+        from db.database import Video, SessionLocal
+        db_session = SessionLocal()
+        try:
+            video = db_session.query(Video).filter(Video.id == video_id).first()
+            if video:
+                video.status = "completed"
+                db_session.commit()
+        finally:
+            db_session.close()
             
     except Exception as e:
         import traceback
         traceback.print_exc()
         
         # Update status to failed instead of deleting
-        video = db_session.query(Video).filter(Video.id == video_id).first()
-        if video:
-            video.status = "failed"
-            db_session.commit()
+        from db.database import Video, SessionLocal
+        db_session = SessionLocal()
+        try:
+            video = db_session.query(Video).filter(Video.id == video_id).first()
+            if video:
+                video.status = "failed"
+                db_session.commit()
+        finally:
+            db_session.close()
+            
         if os.path.exists(file_path):
             os.remove(file_path)
-    finally:
-        db_session.close()
