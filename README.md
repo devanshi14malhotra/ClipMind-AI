@@ -118,3 +118,6 @@ If you wish to run the project locally using Docker Compose:
    ```
 
 5. Access the frontend at `http://localhost:3000` and backend at `http://localhost:8000`.
+
+
+``` Project prepared for the Infosys Springboard AI Internship 7.0```
