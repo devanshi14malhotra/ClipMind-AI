@@ -159,6 +159,37 @@ def remove_student(
     db.commit()
     return {"message": "Student removed successfully"}
 
+
+@router.delete("/{classroom_id}")
+def delete_classroom(
+    classroom_id: int,
+    current_user: User = Depends(require_educator),
+    db: Session = Depends(get_db)
+):
+    classroom = db.query(Classroom).filter(Classroom.id == classroom_id, Classroom.owner_id == current_user.id).first()
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Classroom not found")
+    
+    # Unassign videos so they become private
+    videos = db.query(Video).filter(Video.classroom_id == classroom.id).all()
+    for video in videos:
+        video.classroom_id = None
+        
+    # Delete student enrollments
+    db.query(ClassroomStudent).filter(ClassroomStudent.classroom_id == classroom.id).delete()
+    
+    # Delete the classroom
+    db.delete(classroom)
+    
+    log = AuditLog(
+        action="classroom_deleted",
+        user_id=current_user.id,
+        details=f"Educator deleted classroom '{classroom.name}'"
+    )
+    db.add(log)
+    db.commit()
+    return {"message": "Classroom deleted successfully"}
+
 from db.mongodb import get_mongo_db
 import asyncio
 

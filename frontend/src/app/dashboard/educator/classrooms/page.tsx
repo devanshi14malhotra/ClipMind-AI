@@ -64,6 +64,22 @@ export default function EducatorClassroomsPage() {
     }
   };
 
+  const handleDelete = async (id: number, name: string) => {
+    if (!window.confirm(`Are you sure you want to delete classroom '${name}'? All enrolled students will be removed and assigned videos will become private.`)) return;
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch(`${API_URL}/api/classroom/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) fetchClassrooms();
+      else alert("Failed to delete classroom.");
+    } catch (e) {
+      console.error(e);
+      alert("Error deleting classroom.");
+    }
+  };
+
   if (isLoading) return <div className="p-8">Loading classrooms...</div>;
 
   return (
@@ -88,8 +104,17 @@ export default function EducatorClassroomsPage() {
           <div key={cls.id} className="glass-panel p-6 rounded-3xl border border-white/5 relative overflow-hidden group hover:border-white/20 transition-all hover:-translate-y-1">
             <div className="flex justify-between items-start mb-4 relative z-10">
               <h3 className="text-2xl font-bold text-white">{cls.name}</h3>
-              <div className="bg-white/10 px-3 py-1 rounded-full border border-white/10">
-                <span className="font-mono text-accent font-bold tracking-widest">{cls.code}</span>
+              <div className="flex gap-2 items-center">
+                <div className="bg-white/10 px-3 py-1 rounded-full border border-white/10">
+                  <span className="font-mono text-accent font-bold tracking-widest">{cls.code}</span>
+                </div>
+                <button 
+                  onClick={() => handleDelete(cls.id, cls.name)}
+                  className="bg-red-500/10 text-red-500 p-1.5 rounded-lg border border-red-500/20 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center"
+                  title="Delete Classroom"
+                >
+                  <span className="material-symbols-outlined text-[18px]">delete</span>
+                </button>
               </div>
             </div>
             
