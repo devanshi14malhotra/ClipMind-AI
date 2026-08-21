@@ -1,7 +1,7 @@
 import os
 from motor.motor_asyncio import AsyncIOMotorClient
 
-MONGO_URL = os.getenv("MONGO_URL", "mongodb://root:REMOVED_SECRET@localhost:27017/")
+MONGO_URL = os.environ["MONGO_URL"]
 
 client = None
 db = None
