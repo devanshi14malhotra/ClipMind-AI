@@ -207,25 +207,29 @@ export default function UploadPage() {
       setTimeout(() => setProcessSteps(prev => [...prev, "Generating Multi-Paragraph Summary..."]), 4500);
       
       const pollInterval = setInterval(async () => {
-        const res = await fetch(`${API_URL}/api/video/${videoId}`, {
-          headers: { "Authorization": `Bearer ${token}` }
-        });
-        if (res.ok) {
-          const video = await res.json();
-          if (video.status === "completed") {
+        try {
+          const res = await fetch(`${API_URL}/api/video/${videoId}`, {
+            headers: { "Authorization": `Bearer ${token}` }
+          });
+          if (res.ok) {
+            const video = await res.json();
+            if (video.status === "completed") {
+              clearInterval(pollInterval);
+              setProcessSteps(prev => [...prev, "Done! Redirecting..."]);
+              setTimeout(() => router.push(`/dashboard/video/${videoId}`), 1000);
+            } else if (video.status === "failed") {
+              clearInterval(pollInterval);
+              alert("Video processing failed. Please check the backend logs.");
+              setIsProcessing(false);
+            }
+          } else if (res.status === 404) {
             clearInterval(pollInterval);
-            setProcessSteps(prev => [...prev, "Done! Redirecting..."]);
-            setTimeout(() => router.push(`/dashboard/video/${videoId}`), 1000);
-          } else if (video.status === "failed") {
-            clearInterval(pollInterval);
-            alert("Video processing failed. Please check the backend logs.");
+            alert("Video processing failed. The video was removed.");
             setIsProcessing(false);
+            setVideoId(null);
           }
-        } else if (res.status === 404) {
-          clearInterval(pollInterval);
-          alert("Video processing failed. The video was removed.");
-          setIsProcessing(false);
-          setVideoId(null);
+        } catch (e) {
+          console.warn("Polling connection error:", e);
         }
       }, 2000);
     } catch (err) {
