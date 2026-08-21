@@ -122,4 +122,10 @@ If you wish to run the project locally using Docker Compose:
 ---
 ---
 
-**_Project prepared for the Infosys Springboard AI Internship 7.0_**
+<details>
+  <summary>Project prepared for the Infosys Springboard AI Internship 7.0</summary>
+  
+[github.com/springboardmentor3010s/Clip-Mind-AI/tree/Devanshi-Malhotra](https://github.com/springboardmentor3010s/Clip-Mind-AI/tree/Devanshi-Malhotra)
+  
+</details>
+
