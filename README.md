@@ -38,15 +38,17 @@ graph TD
     end
 
     subgraph Backend ["Backend (FastAPI)"]
+        Auth["JWT Auth Middleware"]
         API["API Router"]
-        Worker["Background Processor"]
+        Worker["FastAPI BackgroundTasks"]
         Audio["FFmpeg Extraction"]
         YTDLP["yt-dlp Downloader"]
     end
 
-    subgraph Databases ["Database Layer"]
+    subgraph Databases ["Data & Storage Layer"]
         SQL[("PostgreSQL<br>Users, Roles, Metadata")]
         NoSQL[("MongoDB<br>Transcripts, Summaries")]
+        Disk[("Local Ephemeral Disk<br>.mp4 Video Storage")]
     end
 
     subgraph AI ["Groq LPU API"]
@@ -54,15 +56,21 @@ graph TD
         LLaMA["LLaMA-3 (Summarization)"]
     end
 
-    UI <-->|REST API Requests| API
-    API -->|Video Files / URLs| Worker
-    Worker -->|Import YouTube| YTDLP
-    Worker -->|Extract Audio MP3| Audio
-    Audio -->|Send Audio| Whisper
-    Whisper -->|Send Transcript| LLaMA
+    UI <-->|REST API Requests| Auth
+    Auth -->|Validated Requests| API
+    
+    API -->|Direct File Upload| Disk
+    API -->|Dispatch Task| Worker
+    
+    Worker -->|Import YouTube URL| YTDLP
+    YTDLP -->|Save Downloaded Video| Disk
+    
+    Worker -->|Read Video from Disk| Audio
+    Audio -->|Send Audio Payload| Whisper
+    Whisper -->|Send Raw Transcript| LLaMA
     
     API <-->|Store/Fetch structured data| SQL
-    Worker -->|Save JSON payloads| NoSQL
+    Worker -->|Save AI JSON payloads| NoSQL
     API <-->|Fetch AI Insights| NoSQL
 ```
 
