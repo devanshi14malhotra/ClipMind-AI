@@ -33,25 +33,25 @@ All detailed documentation regarding architecture, milestones, API endpoints, an
 ```mermaid
 graph TD
     subgraph Frontend ["Frontend (Next.js)"]
-        UI[Dashboard UI]
-        Player[Interactive Video Player]
+        UI["Dashboard UI"]
+        Player["Interactive Video Player"]
     end
 
     subgraph Backend ["Backend (FastAPI)"]
-        API[API Router]
-        Worker[Background Processor]
-        Audio[FFmpeg Extraction]
-        YTDLP[yt-dlp Downloader]
+        API["API Router"]
+        Worker["Background Processor"]
+        Audio["FFmpeg Extraction"]
+        YTDLP["yt-dlp Downloader"]
     end
 
     subgraph Databases ["Database Layer"]
-        SQL[(PostgreSQL\nUsers, Roles, Metadata)]
-        NoSQL[(MongoDB\nTranscripts, Summaries)]
+        SQL[("PostgreSQL<br>Users, Roles, Metadata")]
+        NoSQL[("MongoDB<br>Transcripts, Summaries")]
     end
 
     subgraph AI ["Groq LPU API"]
-        Whisper[Whisper-V3 (Speech-to-Text)]
-        LLaMA[LLaMA-3 (Summarization)]
+        Whisper["Whisper-V3 (Speech-to-Text)"]
+        LLaMA["LLaMA-3 (Summarization)"]
     end
 
     UI <-->|REST API Requests| API
