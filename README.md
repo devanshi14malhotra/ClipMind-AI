@@ -53,7 +53,7 @@ graph TD
 
     subgraph AI ["Groq LPU API"]
         Whisper["Whisper-V3 (Speech-to-Text)"]
-        Groq["Groq LLM (Summarization)"]
+        LLAMA["Groq LLM (Summarization)"]
     end
 
     UI <-->|REST API Requests| Auth
