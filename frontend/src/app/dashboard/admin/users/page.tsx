@@ -113,10 +113,10 @@ export default function AdminUsersPage() {
                         value={user.role}
                         onChange={(e) => handleRoleChange(user.id, e.target.value)}
                       >
+                        <option value={user.role}>
+                          {user.role.split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                        </option>
                         <option value="administrator">Administrator</option>
-                        <option value="content_creator">Content Creator</option>
-                        <option value="educator">Educator</option>
-                        <option value="learner">Learner</option>
                       </select>
                   )}
                 </td>
