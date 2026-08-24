@@ -12,6 +12,7 @@ export default function Dashboard() {
   const [isDateOpen, setIsDateOpen] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -95,12 +96,21 @@ export default function Dashboard() {
     )
   ).filter(Boolean);
 
-  const filteredVideos = selectedTag
-    ? videos.filter((v) => {
-        const userTags = v.tags ? v.tags.split(",").map((t: string) => t.trim().toLowerCase()) : [];
-        return userTags.includes(selectedTag.toLowerCase());
-      })
-    : videos;
+  const filteredVideos = videos.filter((v) => {
+    let matchTag = true;
+    if (selectedTag) {
+      const userTags = v.tags ? v.tags.split(",").map((t: string) => t.trim().toLowerCase()) : [];
+      matchTag = userTags.includes(selectedTag.toLowerCase());
+    }
+    
+    let matchSearch = true;
+    if (searchTerm) {
+      const title = (v.title || v.filename || "").toLowerCase();
+      matchSearch = title.includes(searchTerm.toLowerCase());
+    }
+    
+    return matchTag && matchSearch;
+  });
 
   return (
     <>
@@ -110,6 +120,16 @@ export default function Dashboard() {
           <p className="text-text-secondary font-light">Welcome back. Your AI insights are ready.</p>
         </div>
         <div className="flex flex-wrap gap-4 shrink-0 relative">
+          <div className="relative">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary text-sm pointer-events-none">search</span>
+            <input 
+              type="text" 
+              placeholder="Search videos..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="glass-panel border border-white/10 text-white pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-accent transition-all w-48 focus:w-64 placeholder-text-tertiary"
+            />
+          </div>
           <div className="relative">
             <button 
               onClick={() => { setIsFilterOpen(!isFilterOpen); setIsDateOpen(false); }}

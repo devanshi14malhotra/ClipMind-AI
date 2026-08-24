@@ -105,25 +105,23 @@ export default function AdminUsersPage() {
                 </td>
                 <td className="px-6 py-4 text-text-secondary">{user.email}</td>
                 <td className="px-6 py-4">
-                  <select 
-                      className="bg-black/50 border border-white/10 rounded-lg text-white px-3 py-2 outline-none focus:border-accent capitalize"
-                      value={user.role}
-                      onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                    >
-                      <option value={user.role}>
-                        {user.role.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
-                      </option>
-                      {user.role !== 'administrator' && (
+                  {user.role === 'administrator' ? (
+                    <span className="text-white px-3 py-2 opacity-70">Administrator</span>
+                  ) : (
+                    <select 
+                        className="bg-black/50 border border-white/10 rounded-lg text-white px-3 py-2 outline-none focus:border-accent capitalize"
+                        value={user.role}
+                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                      >
+                        <option value={user.role}>
+                          {user.role.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                        </option>
                         <option value="administrator">Administrator</option>
-                      )}
-                      {user.role === 'administrator' && (
-                        <>
-                          <option value="content_creator">Content Creator</option>
-                          <option value="educator">Educator</option>
-                          <option value="learner">Learner</option>
-                        </>
-                      )}
-                    </select>
+                        <option value="content_creator">Content Creator</option>
+                        <option value="educator">Educator</option>
+                        <option value="learner">Learner</option>
+                      </select>
+                  )}
                 </td>
                 <td className="px-6 py-4">
                   <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-green-500/20 text-green-400 border border-green-500/20">
@@ -131,13 +129,15 @@ export default function AdminUsersPage() {
                   </span>
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <button 
-                    onClick={() => handleDeleteUser(user.id)}
-                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10 p-2 rounded-lg transition-colors"
-                    title="Delete User"
-                  >
-                    <span className="material-symbols-outlined text-xl">delete</span>
-                  </button>
+                  {user.role !== 'administrator' && (
+                    <button 
+                      onClick={() => handleDeleteUser(user.id)}
+                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10 p-2 rounded-lg transition-colors"
+                      title="Delete User"
+                    >
+                      <span className="material-symbols-outlined text-xl">delete</span>
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

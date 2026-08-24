@@ -741,9 +741,16 @@ export default function VideoSummaryPage({ params }: { params: Promise<{ id: str
             <div className="space-y-6">
               <h5 className="text-xl font-bold text-white">{editingStudyGuide ? editedStudyGuide?.title : studyGuide?.title}</h5>
               {(editingStudyGuide ? editedStudyGuide?.sections : studyGuide?.sections)?.map((sec: any, i: number) => (
-                <div key={i} className="glass-panel border border-white/10 p-6 rounded-2xl space-y-3">
+                <div key={i} className="glass-panel border border-white/10 p-6 rounded-2xl space-y-3 relative group/sec">
                   {editingStudyGuide ? (
                     <>
+                      <button onClick={() => {
+                        const ns = JSON.parse(JSON.stringify(editedStudyGuide));
+                        ns.sections.splice(i, 1);
+                        setEditedStudyGuide(ns);
+                      }} className="absolute top-4 right-4 text-red-500 hover:text-red-400 bg-red-500/10 p-1.5 rounded-lg opacity-0 group-hover/sec:opacity-100 transition-opacity" title="Delete Module">
+                        <span className="material-symbols-outlined text-sm">delete</span>
+                      </button>
                       <input value={sec.heading} onChange={(e) => {
                         const ns = JSON.parse(JSON.stringify(editedStudyGuide));
                         ns.sections[i].heading = e.target.value;
@@ -763,6 +770,16 @@ export default function VideoSummaryPage({ params }: { params: Promise<{ id: str
                   )}
                 </div>
               ))}
+              {editingStudyGuide && (
+                <button onClick={() => {
+                  const ns = JSON.parse(JSON.stringify(editedStudyGuide));
+                  if (!ns.sections) ns.sections = [];
+                  ns.sections.push({ heading: "New Module", content: "Module content..." });
+                  setEditedStudyGuide(ns);
+                }} className="w-full glass-panel border border-dashed border-white/30 text-white/50 hover:border-white/50 hover:text-white py-4 rounded-2xl flex justify-center items-center gap-2 transition-colors">
+                  <span className="material-symbols-outlined">add</span> Add New Module
+                </button>
+              )}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -868,8 +885,15 @@ export default function VideoSummaryPage({ params }: { params: Promise<{ id: str
                     setEditedQuiz(nq);
                   }} className="w-full bg-black/50 border border-white/20 rounded-lg px-3 py-2 text-white font-bold outline-none focus:border-accent text-xl" />
                   {editedQuiz?.questions?.map((q: any, i: number) => (
-                    <div key={i} className="glass-panel border border-white/10 p-6 rounded-2xl space-y-4">
-                      <div className="flex items-center gap-2">
+                    <div key={i} className="glass-panel border border-white/10 p-6 rounded-2xl space-y-4 relative group/q">
+                      <button onClick={() => {
+                        const nq = JSON.parse(JSON.stringify(editedQuiz));
+                        nq.questions.splice(i, 1);
+                        setEditedQuiz(nq);
+                      }} className="absolute top-4 right-4 text-red-500 hover:text-red-400 bg-red-500/10 p-1.5 rounded-lg opacity-0 group-hover/q:opacity-100 transition-opacity z-10" title="Delete Question">
+                        <span className="material-symbols-outlined text-sm">delete</span>
+                      </button>
+                      <div className="flex items-center gap-2 pr-8">
                         <span className="text-accent font-bold text-sm shrink-0">{i + 1}.</span>
                         <input value={q.q} onChange={e => {
                           const nq = JSON.parse(JSON.stringify(editedQuiz));
@@ -902,6 +926,14 @@ export default function VideoSummaryPage({ params }: { params: Promise<{ id: str
                       <p className="text-xs text-text-tertiary">Click a letter to mark it as the correct answer.</p>
                     </div>
                   ))}
+                  <button onClick={() => {
+                    const nq = JSON.parse(JSON.stringify(editedQuiz));
+                    if (!nq.questions) nq.questions = [];
+                    nq.questions.push({ q: "New Question?", options: ["Option A", "Option B", "Option C", "Option D"], answer: "Option A" });
+                    setEditedQuiz(nq);
+                  }} className="w-full glass-panel border border-dashed border-white/30 text-white/50 hover:border-white/50 hover:text-white py-4 rounded-2xl flex justify-center items-center gap-2 transition-colors mt-4">
+                    <span className="material-symbols-outlined">add</span> Add New Question
+                  </button>
                 </>
               ) : (
                 /* ── Read / Play mode ── */

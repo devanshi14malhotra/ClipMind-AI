@@ -69,7 +69,7 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="space-y-5">
               
               {/* Demo Logins */}
-              <div className="mb-6">
+              <div className="mb-6 hidden">
                 <p className="text-xs text-text-secondary text-center mb-3 uppercase tracking-wider font-semibold">Demo Accounts</p>
                 <div className="grid grid-cols-2 gap-2">
                   <button type="button" onClick={() => {setEmail('admin@clipmind.com'); setPassword('admin123');}} className="text-xs bg-white/5 hover:bg-white/10 border border-white/10 text-white py-2 rounded-lg transition-colors">Admin</button>

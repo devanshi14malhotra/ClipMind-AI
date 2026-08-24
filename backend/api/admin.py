@@ -49,6 +49,9 @@ def update_user_role(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
         
+    if user.role == "administrator":
+        raise HTTPException(status_code=403, detail="Cannot change role of an existing administrator")
+        
     user.role = request.role
     
     log = AuditLog(
@@ -71,6 +74,9 @@ def delete_user(
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+        
+    if user.role == "administrator":
+        raise HTTPException(status_code=403, detail="Cannot delete an administrator account")
         
     db.query(Video).filter(Video.owner_id == user_id).delete()
     db.query(LearningHistory).filter(LearningHistory.user_id == user_id).delete()
@@ -171,24 +177,7 @@ def get_all_videos(admin: User = Depends(require_admin), db: Session = Depends(g
 
 @router.delete("/videos/{video_id}")
 def delete_video(video_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
-    video = db.query(Video).filter(Video.id == video_id).first()
-    if not video:
-        raise HTTPException(status_code=404, detail="Video not found")
-        
-    db.query(LearningHistory).filter(LearningHistory.video_id == video_id).delete()
-    db.query(Bookmark).filter(Bookmark.video_id == video_id).delete()
-    db.query(Video).filter(Video.id == video_id).delete()
-    
-    log = AuditLog(
-        action="video_deleted",
-        user_id=admin.id,
-        target_id=str(video_id),
-        details=f"Admin deleted video '{video.title}' (ID: {video_id})"
-    )
-    db.add(log)
-    db.commit()
-    
-    return {"message": "Video deleted successfully"}
+    raise HTTPException(status_code=403, detail="Administrators are not allowed to delete videos")
 
 from db.mongodb import get_mongo_db
 

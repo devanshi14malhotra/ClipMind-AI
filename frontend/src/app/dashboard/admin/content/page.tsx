@@ -94,14 +94,8 @@ export default function AdminContentPage() {
                     {video.status}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-right">
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); handleDeleteVideo(video.id); }}
-                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10 p-2 rounded-lg transition-colors"
-                    title="Delete Video"
-                  >
-                    <span className="material-symbols-outlined text-xl">delete</span>
-                  </button>
+                <td className="px-6 py-4 text-right text-text-tertiary">
+                  <span className="text-xs">View only</span>
                 </td>
               </tr>
             ))}
