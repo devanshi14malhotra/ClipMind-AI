@@ -22,3 +22,5 @@ testing/*.pyc
 __pycache__/
 *.py[cod]
 old/
+ppt_text.txt
+ClipMind-AI(1).pptx
